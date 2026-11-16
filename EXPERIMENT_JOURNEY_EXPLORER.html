@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Experimental Arm Journey &amp; Decision Explorer — Independent Research Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #F1F5F9; color: #0F172A; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .slider-rose::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #E11D48; cursor: pointer; border: 2px solid #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .slider-purple::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #9333EA; cursor: pointer; border: 2px solid #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .slider-amber::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #D97706; cursor: pointer; border: 2px solid #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .badge-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+  <!-- Top Navigation & TUM Academic Brand Bar -->
+  <header class="bg-[#0B1120] border-b-2 border-[#3070B3] text-white px-6 py-3 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#3070B3]/20 border border-[#3070B3] text-[#93C5FD]">
+          🔬 HITL ACCOUNTABILITY STUDY // JOURNEY EXPLORER (PROTOTYPE)
+        </span>
+        <h1 class="text-sm font-semibold tracking-wide text-slate-100 hidden sm:inline">
+          Manager-Seat Accountability Sink Simulator <span class="text-slate-400 font-normal">| Master Journey Explorer</span>
+        </h1>
+      </div>
+      <div class="flex items-center gap-4 text-xs font-mono text-slate-300">
+        <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">Spec: v2.5.1</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-700 text-emerald-400">145/145 Tests Green</span>
+        <a href="./index.html?access=demo2026&arm=3" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline font-medium">
+          Live Experiment ↗
+        </a>
+      </div>
+    </div>
+  </header>
+  <!-- Sub-Header: Arm Selector & Scenario Quick-Launcher -->
+  <section class="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
+    <div class="max-w-7xl mx-auto space-y-3">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Experimental Treatment Arm</span>
+          <div class="flex flex-wrap gap-2 mt-1" id="armSelectorTabs">
+            <button onclick="setArm(1)" id="btnArm1" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-white border-slate-300 text-slate-700 hover:border-slate-400">
+              Arm 1: Corporate Control (Baseline)
+            </button>
+            <button onclick="setArm(2)" id="btnArm2" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-white border-slate-300 text-slate-700 hover:border-slate-400">
+              Arm 2: STAMP Cognitive Ergonomics
+            </button>
+            <button onclick="setArm(3)" id="btnArm3" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-200">
+              Arm 3: Embodied Friction (Floor Rotation)
+            </button>
+            <button onclick="setArm(4)" id="btnArm4" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-white border-slate-300 text-slate-700 hover:border-slate-400">
+              Arm 4: EU AI Act Regulatory Shield
+            </button>
+          </div>
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">1-Click Scenario Presets</span>
+          <div class="flex flex-wrap gap-2 mt-1">
+            <button onclick="applyPreset('arm3_absorb')" class="px-2.5 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-medium">
+              🎯 Arm 3: Hypocrisy Salience & Blame Absorption
+            </button>
+            <button onclick="applyPreset('arm3_scapegoat')" class="px-2.5 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-medium">
+              ⚡ Arm 3: Speed Maximizer & Sara Scapegoated
+            </button>
+            <button onclick="applyPreset('arm4_reveal')" class="px-2.5 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-medium">
+              ⚖️ Arm 4: Greed Trap & Regulatory Fines
+            </button>
+            <button onclick="applyPreset('arm4_integrity')" class="px-2.5 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-medium">
+              🛡️ Arm 4: Moral Courage & +€1.00 Credit
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen Stepper Navigation -->
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between overflow-x-auto gap-2 text-xs font-medium text-slate-600" id="screenStepper">
+        <button onclick="goToStep(1)" id="stepTab1" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-blue-50 text-blue-700 font-semibold border border-blue-200 whitespace-nowrap">
+          <span>1. Onboarding</span>
+        </button>
+        <span class="text-slate-300">➔</span>
+        <button onclick="goToStep('1B')" id="stepTab1B" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 font-semibold whitespace-nowrap">
+          <span class="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
+          <span>1B. Floor Rotation (Arm 3 Only)</span>
+        </button>
+        <span class="text-slate-300" id="arrow1B">➔</span>
+        <button onclick="goToStep('2A')" id="stepTab2A" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-slate-100 whitespace-nowrap">
+          <span>2A. Policy Setup</span>
+        </button>
+        <span class="text-slate-300">➔</span>
+        <button onclick="goToStep('2B')" id="stepTab2B" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-slate-100 whitespace-nowrap">
+          <span>2B. Shifts 1–3 & Crash</span>
+        </button>
+        <span class="text-slate-300">➔</span>
+        <button onclick="goToStep(3)" id="stepTab3" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-slate-100 whitespace-nowrap">
+          <span>3. Forensic Audit</span>
+        </button>
+        <span class="text-slate-300">➔</span>
+        <button onclick="goToStep(4)" id="stepTab4" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-slate-100 whitespace-nowrap">
+          <span>4. Board Accountability</span>
+        </button>
+        <span class="text-slate-300">➔</span>
+        <button onclick="goToStep(5)" id="stepTab5" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-slate-100 whitespace-nowrap">
+          <span>5. Shift 4 & Debrief</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Split Layout Container -->
+  <main class="max-w-7xl w-full mx-auto p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Left Column (lg:col-span-8): Active Screen Interactive Mockup & Decision Levers -->
+    <div class="lg:col-span-8 space-y-6">
+      <!-- SCREEN 1 CONTAINER: ONBOARDING STEPPER -->
+      <div id="screenView1" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 1 of 5 (S1_ONBOARDING)</span>
+            <h2 class="text-lg font-bold text-slate-800">Executive Onboarding & Incentive Briefing</h2>
+          </div>
+          <span class="text-xs font-mono px-2 py-1 rounded bg-slate-100 text-slate-600" id="s1StepCounter">Step 1 of 5</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs font-medium" id="s1PillNav">
+          <button onclick="setS1SubStep(1)" id="pillS1Step1" class="p-2 rounded border bg-blue-600 text-white text-center font-semibold">1. Welcome</button>
+          <button onclick="setS1SubStep(2)" id="pillS1Step2" class="p-2 rounded border bg-slate-50 text-slate-600 hover:bg-slate-100 text-center">2. Escrow</button>
+          <button onclick="setS1SubStep(3)" id="pillS1Step3" class="p-2 rounded border bg-slate-50 text-slate-600 hover:bg-slate-100 text-center">3. Mandate</button>
+          <button onclick="setS1SubStep(4)" id="pillS1Step4" class="p-2 rounded border bg-slate-50 text-slate-600 hover:bg-slate-100 text-center">4. Team & AI</button>
+          <button onclick="setS1SubStep(5)" id="pillS1Step5" class="p-2 rounded border bg-slate-50 text-slate-600 hover:bg-slate-100 text-center">5. Bonus</button>
+          <button onclick="setS1SubStep(6)" id="pillS1Step6" class="p-2 rounded border bg-purple-100 text-purple-800 border-purple-300 text-center col-span-2 md:col-span-1 hidden font-semibold">6. Floor Briefing (Arm 3)</button>
+        </div>
+        <!-- Active S1 Step Content -->
+        <div id="s1StepCardBody" class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm space-y-3">
+          <!-- Dynamically populated by JS -->
+        </div>
+        <div class="flex items-center justify-between pt-2">
+          <button onclick="prevS1SubStep()" id="btnS1Prev" class="px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-100 font-medium">← Previous Step</button>
+          <button onclick="nextS1SubStep()" id="btnS1Next" class="px-4 py-1.5 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Continue ➔</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 1B CONTAINER: DAY-1 FLOOR ROTATION (ARM 3 ONLY) -->
+      <div id="screenView1B" class="bg-white border border-purple-200 rounded-xl p-6 shadow-sm space-y-4 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-purple-100">
+          <div>
+            <span class="text-xs font-bold text-purple-700 uppercase tracking-wider">Screen 1B (Arm 3 Exclusive — S1B_FLOOR & S1B_FLOOR_KPI)</span>
+            <h2 class="text-lg font-bold text-slate-800">Day-1 Floor Rotation (Experiential Friction)</h2>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-300">Arm 3 Sensorimotor Manipulation</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Case 1: Untimed Natural Baseline -->
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-700">Case #089: Untimed Natural Pace</span>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Untimed</span>
+            </div>
+            <p class="text-xs text-slate-600">RTX 6000 Ada (€3,600). Participant freely clicks Tabs 1, 2, 3 to establish natural verification dwell $T_1$.</p>
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-700 flex justify-between">
+                <span>Natural Dwell $T_1$:</span>
+                <span id="lblS1bCase1Dwell" class="font-mono font-bold text-blue-600">46.5s</span>
+              </label>
+              <input type="range" id="rngS1bCase1Dwell" min="20" max="75" step="0.5" value="46.5" oninput="updateCase1Dwell(this.value)" class="w-full h-1.5 bg-slate-200 rounded-lg accent-blue-600 cursor-pointer">
+            </div>
+            <div class="flex gap-2 text-xs">
+              <button onclick="setCase1Action('APPROVE')" id="btnCase1ApproveSim" class="flex-1 py-1.5 rounded bg-emerald-600 text-white font-semibold">✓ Approve Release</button>
+              <button onclick="setCase1Action('FLAG')" id="btnCase1FlagSim" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-200 font-medium">Flag RMA</button>
+            </div>
+          </div>
+
+          <!-- Case 2: 25.0s SLA Speed Test -->
+          <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/50 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-purple-900">Case #094: 25.0s SLA Countdown</span>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-100 text-amber-800">25.0s Limit</span>
+            </div>
+            <p class="text-xs text-slate-600">RTX 6000 Ada (€4,200). 25s timer runs. Participant experiences impossibility of reviewing Tab 3 depot scale log.</p>
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-700 flex justify-between">
+                <span>Pages Inspected under 25s:</span>
+                <span id="lblS1bCase2Pages" class="font-mono font-bold text-purple-700">2/3 (Page 3 Unopened)</span>
+              </label>
+              <select id="selCase2Pages" onchange="updateCase2Pages(this.value)" class="w-full text-xs p-1.5 rounded border border-slate-300 bg-white">
+                <option value="1">1/3 Checked (Tab 1 Only — Pages 2 & 3 Unopened)</option>
+                <option value="2" selected>2/3 Checked (Tabs 1 & 2 — Page 3 Scale Log Unopened)</option>
+                <option value="3">3/3 Checked (All 3 Pages Checked before clock ran out)</option>
+              </select>
+            </div>
+            <div class="flex gap-2 text-xs">
+              <button onclick="setCase2Action('QUICK_APPROVE')" id="btnCase2QuickSim" class="flex-1 py-1.5 rounded bg-purple-600 text-white font-semibold shadow-sm">⚡ Quick Approve (13.8s)</button>
+              <button onclick="setCase2Action('ESCALATE')" id="btnCase2EscalateSim" class="flex-1 py-1.5 rounded border border-purple-300 bg-white hover:bg-purple-100 text-purple-800 font-medium">🛡️ Hold & Escalate (Timeout)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Scorecard Preview -->
+        <div id="s1bKpiCardSim" class="p-4 rounded-lg bg-slate-900 text-white text-xs space-y-2">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-bold text-purple-400">📊 PRE-MANAGEMENT FLOOR SCORECARD (S1B_FLOOR_KPI)</span>
+            <span class="text-slate-400">Recorded in Session Telemetry</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 rounded bg-slate-800 border border-slate-700">
+              <div class="text-slate-400">Case #089 Natural Baseline:</div>
+              <div class="font-mono font-bold text-emerald-400 text-sm mt-0.5" id="kpiCase1MetricSim">Approved in 46.5s | 3/3 Pages ✓</div>
+            </div>
+            <div class="p-2.5 rounded bg-slate-800 border border-slate-700">
+              <div class="text-slate-400">Case #094 Under 25.0s SLA:</div>
+              <div class="font-mono font-bold text-amber-400 text-sm mt-0.5" id="kpiCase2MetricSim">⚡ Approved at 18.2s | Pages: 2/3 (Page 3 Unopened)</div>
+            </div>
+          </div>
+          <p class="text-slate-400 italic text-[11px] pt-1">
+            ⚠️ AI Copilot falsely reported "Passed 3/3 docs". Your personal verification proves you only checked 2/3. This creates the undeniable hypocrisy trap recalled on Screen 3!
+          </p>
+        </div>
+
+        <!-- Screen 1B Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep(1)" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Back to Briefing (Screen 1)</button>
+          <button onclick="goToStep('2A')" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Proceed to Policy Cockpit (Screen 2A) ➔</button>
+        </div>
+      </div>
+      <!-- SCREEN 2A CONTAINER: POLICY SETUP COCKPIT -->
+      <div id="screenView2A" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 2A (S2A_POLICY_SETUP)</span>
+            <h2 class="text-lg font-bold text-slate-800">Operational SLA Policy Setup Cockpit</h2>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">Pre-Incident Choice</span>
+        </div>
+
+        <p class="text-xs text-slate-600">The manager sets the frontline specialist speed quota for Unit 4 return verifications before dispatching Shift 1.</p>
+
+        <!-- 3 Archetype Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs" id="s2aCardGroup">
+          <button onclick="setS2aSla(25.0)" id="cardSla25" class="p-3 rounded-lg border text-left transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-blue-900">25.0s Speed Quota</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-bold">Bonus Active</span>
+            </div>
+            <div class="text-slate-600 space-y-0.5 text-[11px]">
+              <div>• 36 Cases/Shift (+360 pts)</div>
+              <div>• Meets €4.00 Bonus Hurdle</div>
+              <div>• Tight verification buffer</div>
+            </div>
+          </button>
+          <button onclick="setS2aSla(38.0)" id="cardSla38" class="p-3 rounded-lg border text-left transition-all bg-white border-slate-300 hover:border-slate-400">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-slate-800">38.0s Moderate</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Bonus Forfeit</span>
+            </div>
+            <div class="text-slate-600 space-y-0.5 text-[11px]">
+              <div>• 24 Cases/Shift (+240 pts)</div>
+              <div>• "Organizational Steward"</div>
+              <div>• Below 30-case bonus quota</div>
+            </div>
+          </button>
+          <button onclick="setS2aSla(60.0)" id="cardSla60" class="p-3 rounded-lg border text-left transition-all bg-white border-slate-300 hover:border-slate-400">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-slate-800">60.0s Safe Audit</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-red-100 text-red-800 font-bold">Bonus Forfeit</span>
+            </div>
+            <div class="text-slate-600 space-y-0.5 text-[11px]">
+              <div>• 15 Cases/Shift (+150 pts)</div>
+              <div>• Full ISO & REFA buffer</div>
+              <div>• Below 30-case bonus quota</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Corporate Override Warning (if 38s or 60s chosen) -->
+        <div id="boxCorporateOverride" class="p-3 rounded-lg bg-amber-50 border border-amber-300 text-xs text-amber-900 space-y-1 hidden">
+          <div class="font-bold flex items-center gap-1.5">
+            <span>📋 Corporate Operations Dispatch // Q4 Backlog Override</span>
+          </div>
+          <p>Your preference for <span id="txtChosenSlaPref" class="font-bold">38.0s</span> has been permanently logged in your session telemetry (<code class="font-mono text-[11px]">initialSlaArchetype</code>). However, corporate operations enforces the <strong>25.0s Corporate Baseline</strong> during Shifts 1 & 2 due to Q4 queue surges.</p>
+        </div>
+
+        <!-- Arm 4 EU AI Act Banner (if Arm 4 active) -->
+        <div id="bannerArm4Eu" class="p-3 rounded-lg bg-blue-50 border border-blue-300 text-xs text-blue-900 space-y-1 hidden">
+          <span class="font-bold">⏱️ Internal Work-Study Benchmark Note (REFA / ISO 9241-110: 48.5s):</span>
+          <p>Mandating review times below the empirical 48.5s human verification baseline shifts systemic operational liability to management.</p>
+        </div>
+
+        <!-- Screen 2A Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep(simState.arm === 3 ? '1B' : 1)" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Back to Previous Screen</button>
+          <button onclick="goToStep('2B')" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Dispatch Floor & Launch Shift 1 (Screen 2B) ➔</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2B CONTAINER: ACTIVE FLOOR DISPATCH & ESCALATION -->
+      <div id="screenView2B" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 2B (S2B_ACTIVE_FLOOR)</span>
+            <h2 class="text-lg font-bold text-slate-800">Active Shift Operations & Critical Incident</h2>
+          </div>
+          <span class="text-xs font-mono px-2 py-1 rounded bg-slate-900 text-emerald-400 font-bold">25.0s / Case Queue</span>
+        </div>
+
+        <!-- Shift Stage Tabs -->
+        <div class="grid grid-cols-3 gap-2 text-xs font-medium">
+          <div class="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-center">
+            <div class="font-bold">Shift 1 (Completed)</div>
+            <div class="text-[11px] text-emerald-600 font-mono">+360 Pts (36 Cases)</div>
+          </div>
+          <div class="p-2.5 rounded bg-amber-50 border border-amber-300 text-amber-900 text-center">
+            <div class="font-bold">Shift 2 Escalation</div>
+            <div class="text-[11px] text-amber-700" id="badgeShift2PtsPreview">+360 or +320 Pts</div>
+          </div>
+          <div class="p-2.5 rounded bg-red-50 border border-red-300 text-red-900 text-center">
+            <div class="font-bold">Shift 3 Fraud Crash</div>
+            <div class="text-[11px] text-red-700 font-mono">Case #312 (-300 Hold)</div>
+          </div>
+        </div>
+
+        <!-- Shift 2 Sara Rubber-Stamping Escalation Modal Simulation -->
+        <div class="p-4 rounded-lg bg-amber-50 border border-amber-300 text-xs space-y-3">
+          <div class="flex justify-between items-center text-amber-900">
+            <span class="font-bold text-sm">👩‍💻 Specialist Sara Kowalski (Station 2) Confession:</span>
+            <span class="px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-mono text-[10px] font-bold">50% Progress Alert</span>
+          </div>
+          <blockquote class="italic text-slate-700 border-l-2 border-amber-400 pl-3 py-1 bg-white/70 rounded">
+            "Danial, at 25s per case, nobody can open Page 3. The AI badge says 'Passed 3/3 docs', so we're just stamping it. If there's an empty box scam on Page 3, it's going through. Can we please slow down and verify Page 3, or should we keep trusting the AI?"
+          </blockquote>
+          <div class="space-y-1.5">
+            <span class="font-bold text-slate-800">Your Binding Managerial Directive:</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="setShift2Directive('A_TRUST_AI')" id="btnDirA" class="p-2.5 rounded text-left border transition-all bg-white border-blue-500 ring-2 ring-blue-200 text-blue-900 font-medium">
+                <div class="font-bold text-xs">⚡ Directive A: Trust AI & Push Pace</div>
+                <div class="text-[11px] text-slate-600">"The AI is reliable. Maintain 25s pace!" (+360 pts, 0 penalty)</div>
+              </button>
+              <button onclick="setShift2Directive('B_SLOW_FLOOR')" id="btnDirB" class="p-2.5 rounded text-left border transition-all bg-white border-slate-300 hover:border-slate-400 text-slate-700 font-medium">
+                <div class="font-bold text-xs">⏱️ Directive B: Slow Floor (-40 pt penalty)</div>
+                <div class="text-[11px] text-slate-600">"Safety first. Slow down & check Page 3" (+320 pts, -40 pt penalty)</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shift 3 Case #312 Fraud Crash Incident Summary -->
+        <div class="p-3 rounded-lg bg-red-950 text-white text-xs space-y-1.5 border border-red-700">
+          <div class="flex items-center justify-between text-red-400 font-bold">
+            <span>🚨 SHIFT 3 CRASH FREEZE: CASE #312 FRAUD RELEASE (€4,850.00 LOSS)</span>
+            <span class="font-mono text-xs text-red-300">-300 Pts Provisional Hold</span>
+          </div>
+          <p class="text-slate-300 text-[11px]">Sara cleared Ticket #312 at <strong>13.4s</strong> without reading Page 3 depot weigh-in log. Customer sent empty box (0.24 kg kraft paper vs 4.92 kg GPU). Executive Board freezes floor operations and summons manager to forensic audit.</p>
+        </div>
+
+        <!-- Screen 2B Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep('2A')" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Back to Policy Cockpit (Screen 2A)</button>
+          <button onclick="goToStep(3)" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Inspect Case #312 Audit Dossier (Screen 3) ➔</button>
+        </div>
+      </div>
+      <!-- SCREEN 3 CONTAINER: FORENSIC AUDIT & BOX D TREATMENT -->
+      <div id="screenView3" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 3 (S3_CRASH_AUDIT_LOG)</span>
+            <h2 class="text-lg font-bold text-slate-800">Critical Incident Forensic Audit Dossier</h2>
+          </div>
+          <span class="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-200">Case #312 Post-Mortem</span>
+        </div>
+
+        <!-- 3-Page Return Dossier Preview -->
+        <div class="border border-slate-200 rounded-lg overflow-hidden text-xs">
+          <div class="bg-slate-100 border-b border-slate-200 p-2 flex gap-2 font-medium">
+            <span class="px-2 py-1 rounded bg-white text-slate-700 border">Page 1: Buyer Claim (Defective)</span>
+            <span class="px-2 py-1 rounded bg-white text-slate-700 border">Page 2: Vault Dispatch (4.92 kg)</span>
+            <span class="px-2 py-1 rounded bg-red-600 text-white font-bold animate-pulse">Page 3: Depot Scale (0.24 kg — MISSED)</span>
+          </div>
+          <div class="p-3 bg-red-50 text-red-950 space-y-1">
+            <div class="font-bold flex items-center justify-between">
+              <span>⚠️ Depo Intake Scale Audit: 0.24 kg Inbound vs. 4.92 kg Outbound (-95.1% Weight Deficit)</span>
+              <span class="font-mono text-red-700 font-bold">CRIMINAL EMPTY BOX SCAM</span>
+            </div>
+            <p class="text-[11px] text-red-900">Carton contained crushed kraft packing paper. Factory anti-static seal and RTX 6000 Ada unit were missing entirely prior to carrier drop-off.</p>
+          </div>
+        </div>
+
+        <!-- Audit Boxes A, B, C Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-lg border border-slate-200 bg-slate-50 space-y-1">
+            <span class="font-bold text-slate-700 block">Box A: AI Copilot Stamp</span>
+            <div class="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">🟢 Passed 3/3 Docs (96.4%)</div>
+            <p class="text-[11px] text-slate-500">AI evaluated surface text only. Failed to parse physical scale weight log.</p>
+          </div>
+          <div class="p-3 rounded-lg border border-slate-200 bg-slate-50 space-y-1">
+            <span class="font-bold text-slate-700 block">Box B: Sara Kowalski Log</span>
+            <div class="font-mono text-[11px] text-slate-800">Approved at 13.4s | Page 3: 0.0s</div>
+            <p class="text-[11px] text-slate-600" id="boxBSdirectiveQuote">Directive Logged: "The AI is reliable. Maintain 25s pace and keep moving!"</p>
+          </div>
+          <div class="p-3 rounded-lg border border-slate-200 bg-slate-50 space-y-1">
+            <span class="font-bold text-slate-700 block">Box C: Board Escalation</span>
+            <div class="font-mono text-[11px] text-red-600 font-bold">Loss: €4,850.00 SEPA Wire</div>
+            <p class="text-[11px] text-slate-500">Provisional -300 pt hold applied. Manager summoned to Board Inquiry.</p>
+          </div>
+        </div>
+
+        <!-- BOX D: EXPERIMENTAL TREATMENT MANIPULATION CONTAINER -->
+        <div class="border-2 rounded-xl p-4 transition-all" id="boxDContainer">
+          <div class="flex items-center justify-between pb-2 border-b mb-3" id="boxDHeaderBar">
+            <span class="text-xs font-bold uppercase tracking-wider" id="lblBoxDArmTitle">Box D: Experimental Manipulation (Arm 3)</span>
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded" id="badgeBoxDArm">Treatment Applied</span>
+          </div>
+          <!-- Dynamic Content Area for Box D -->
+          <div id="boxDContentArea" class="text-xs space-y-2">
+            <!-- Rendered dynamically by updateBoxD() -->
+          </div>
+        </div>
+
+        <!-- Screen 3 Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep('2B')" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Back to Shift Operations (Screen 2B)</button>
+          <button onclick="goToStep(4)" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Enter Executive Board Inquiry (Screen 4) ➔</button>
+        </div>
+      </div>
+      <!-- SCREEN 4 CONTAINER: MANDATORY BOARD INQUIRY -->
+      <div id="screenView4" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 4 (S4_BOARD_INQUIRY)</span>
+            <h2 class="text-lg font-bold text-slate-800">Executive Board Accountability & Disciplinary Sanction</h2>
+          </div>
+          <span class="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-slate-900 text-amber-400" id="s4LivePtsHeader">Live Projected: 1,250 pts</span>
+        </div>
+
+        <!-- Task 1A: Continuous Responsibility Attribution Sliders -->
+        <div class="border border-slate-200 rounded-lg p-4 bg-slate-50 space-y-3">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-800">Task 1A: Continuous Responsibility Attribution (0.0 to 10.0)</span>
+            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono font-bold" id="lblDerivedSaraShare">Sara Share: 33.3%</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div>
+              <div class="flex justify-between text-slate-700 font-medium mb-1">
+                <span>Specialist Sara Kowalski (ID #042):</span>
+                <span id="lblValSara" class="font-mono font-bold text-rose-600">5.0</span>
+              </div>
+              <input type="range" id="rngSara" min="0" max="10" step="0.1" value="5.0" oninput="updateSliders()" class="w-full h-1.5 bg-slate-200 rounded-lg slider-rose cursor-pointer">
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-700 font-medium mb-1">
+                <span>AI Copilot System:</span>
+                <span id="lblValAi" class="font-mono font-bold text-purple-600">5.0</span>
+              </div>
+              <input type="range" id="rngAi" min="0" max="10" step="0.1" value="5.0" oninput="updateSliders()" class="w-full h-1.5 bg-slate-200 rounded-lg slider-purple cursor-pointer">
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-700 font-medium mb-1">
+                <span>Unit 4 Systemic SLA Quota (25.0s Quota):</span>
+                <span id="lblValSla" class="font-mono font-bold text-amber-600">5.0</span>
+              </div>
+              <input type="range" id="rngSla" min="0" max="10" step="0.1" value="5.0" oninput="updateSliders()" class="w-full h-1.5 bg-slate-200 rounded-lg slider-amber cursor-pointer">
+            </div>
+          </div>
+        </div>
+
+        <!-- Task 1B: Root Cause Code & Task 1C CDS-II -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-2">
+            <span class="font-bold text-slate-800 block">Task 1B: Primary Root Cause Classification Code</span>
+            <div class="space-y-1">
+              <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer border border-transparent has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
+                <input type="radio" name="rootCause" value="H-1" onchange="updateRootCause(this.value)">
+                <span><strong>H-1:</strong> Operator Negligence (Sara missed scale log)</span>
+              </label>
+              <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer border border-transparent has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
+                <input type="radio" name="rootCause" value="A-2" onchange="updateRootCause(this.value)">
+                <span><strong>A-2:</strong> AI Hallucination (False 'Passed 3/3' green badge)</span>
+              </label>
+              <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer border border-transparent has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
+                <input type="radio" name="rootCause" value="M-3" checked onchange="updateRootCause(this.value)">
+                <span><strong>M-3:</strong> Inadequate SLA Quota (25s made reading impossible)</span>
+              </label>
+            </div>
+          </div>
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-800">Task 1C: Causal Dimension (CDS-II)</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 text-slate-800 font-bold" id="lblCdsProfile">Structural Coerced</span>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-600">
+                <span>Controllability by Sara:</span>
+                <span id="lblCdsA" class="font-bold">2 / 9 (Outside control)</span>
+              </div>
+              <input type="range" id="rngCdsA" min="1" max="9" value="2" oninput="updateCds()" class="w-full h-1 bg-slate-200 rounded accent-slate-700">
+              <div class="flex justify-between text-[11px] text-slate-600 pt-1">
+                <span>SLA Constraint Impossibility:</span>
+                <span id="lblCdsB" class="font-bold">8 / 9 (Strictly impossible)</span>
+              </div>
+              <input type="range" id="rngCdsB" min="1" max="9" value="8" oninput="updateCds()" class="w-full h-1 bg-slate-200 rounded accent-slate-700">
+            </div>
+          </div>
+        </div>
+
+        <!-- TASK 2: THE VISCERAL DISCIPLINARY FORK (THE SCAPEGOATING FORK) -->
+        <div class="border-2 border-slate-300 rounded-xl p-4 bg-white space-y-3" id="s4Task2ForkContainer">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-900 uppercase tracking-wide text-sm">Task 2: Disciplinary Determination & Financial Sanction</span>
+            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">Primary Behavioral DV ($Y_i$)</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <!-- Option 1: Charge Sara -->
+            <button onclick="setTask2Choice(1)" id="btnForkOption1" class="p-4 rounded-xl border text-left transition-all space-y-2 bg-emerald-50/70 border-emerald-400 ring-2 ring-emerald-300">
+              <div class="flex justify-between items-start">
+                <span class="font-bold text-emerald-950 text-sm">Option 1: Penalize Specialist Sara</span>
+                <span class="px-2 py-0.5 rounded text-[11px] bg-emerald-200 text-emerald-900 font-bold" id="badgeOption1Header">+300 Pts Released</span>
+              </div>
+              <p class="text-slate-700 text-[11px]" id="txtOption1Body">
+                Cite official "HUMAN-VERIFIED BY: SARA" stamp. Sara receives formal disciplinary dismissal and forfeits shift bonus. The 300-point hold is lifted back to your management account.
+              </p>
+              <div class="font-mono font-bold text-emerald-800 text-xs pt-1 flex justify-between" id="txtOption1PayoutPreview">
+                <span>Projected Score: ~1,250 pts</span>
+                <span>Unlocks €4.00 Bonus (€6.50 Total)</span>
+              </div>
+            </button>
+
+            <!-- Option 2: Absorb Blame -->
+            <button onclick="setTask2Choice(0)" id="btnForkOption2" class="p-4 rounded-xl border text-left transition-all space-y-2 bg-white border-slate-300 hover:border-slate-400">
+              <div class="flex justify-between items-start">
+                <span class="font-bold text-slate-900 text-sm">Option 2: Absorb Systemic Blame</span>
+                <span class="px-2 py-0.5 rounded text-[11px] bg-red-100 text-red-800 font-bold">-300 Pts Deducted</span>
+              </div>
+              <p class="text-slate-700 text-[11px]" id="txtOption2Body">
+                Sara is cleared of wrongdoing; failure attributed to systemic 25s quota pressure. Management permanently forfeits the 300-point provisional hold.
+              </p>
+              <div class="font-mono font-bold text-red-700 text-xs pt-1 flex justify-between" id="txtOption2PayoutPreview">
+                <span>Projected Score: ~950 pts</span>
+                <span>Forfeits Bonus (€2.50 Base Fee Only)</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Task 4: Shift 4 SLA Reform -->
+        <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 text-xs space-y-2">
+          <span class="font-bold text-slate-800 block">Task 4: Mandatory Operational Quota Policy for Shift 4</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <label class="flex items-center gap-2 p-2 rounded bg-white border border-slate-200 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="task4Sla" value="25.0" onchange="setTask4Sla(25.0)">
+              <div>
+                <div class="font-bold">25.0s Fast Quota</div>
+                <div class="text-[10px] text-slate-500">+260 pts (Fraud Missed)</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded bg-white border border-slate-200 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="task4Sla" value="38.0" onchange="setTask4Sla(38.0)">
+              <div>
+                <div class="font-bold">38.0s Moderate</div>
+                <div class="text-[10px] text-slate-500">+260 pts (Fraud Missed)</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded bg-white border border-slate-200 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="task4Sla" value="60.0" checked onchange="setTask4Sla(60.0)">
+              <div>
+                <div class="font-bold text-emerald-800">60.0s Safe Audit</div>
+                <div class="text-[10px] text-emerald-700 font-bold">+300 pts (+50 Catch Bonus)</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Screen 4 Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep(3)" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Back to Audit Dossier (Screen 3)</button>
+          <button onclick="goToStep(5)" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm">Submit Board Report & View Resolution (Screen 5) ➔</button>
+        </div>
+      </div>
+      <!-- SCREEN 5 CONTAINER: SHIFT 4 RESOLUTION, DEBRIEF & PAYOUT -->
+      <div id="screenView5" class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5 hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Screen 5 (S5_SHIFT4_AND_DEBRIEF)</span>
+            <h2 class="text-lg font-bold text-slate-800">Operational Resolution, Debriefing & Final Compensation</h2>
+          </div>
+          <span class="text-xs font-bold font-mono px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300" id="s5FinalPayoutBadge">Total Payout: €6.50</span>
+        </div>
+
+        <!-- Shift 4 Execution & Case #409 Outcome -->
+        <div class="p-3.5 rounded-lg border text-xs space-y-1.5" id="s5Shift4ResultBox">
+          <div class="flex justify-between items-center font-bold">
+            <span id="lblShift4OutcomeTitle">Shift 4 Resolution: 60.0s Ergonomically Compliant Safe Audit</span>
+            <span class="font-mono text-emerald-700 font-bold" id="lblShift4PtsBadge">+300 Pts Awarded</span>
+          </div>
+          <p class="text-slate-600" id="lblShift4OutcomeDesc">
+            Specialist Sara had sufficient time to inspect Page 3 on Ticket #409 (RTX 6000 Ada, €5,200), caught an empty-box kraft paper discrepancy (0.31 kg vs 4.92 kg), and prevented a fraudulent escrow release! Awarded +50 pt Quality Fraud Catch Bonus.
+          </p>
+        </div>
+
+        <!-- ARM 4 EX-POST BAYLDA REGULATORY AUDIT REVEAL (ARM 4 ONLY) -->
+        <div id="s5Arm4RevealContainer" class="p-4 rounded-xl border-2 space-y-2 text-xs hidden">
+          <!-- Rendered dynamically by updateArm4Reveal() -->
+        </div>
+
+        <!-- Itemized Transparent Financial Ledger -->
+        <div class="border border-slate-200 rounded-lg overflow-hidden text-xs">
+          <div class="bg-slate-800 text-white p-2.5 font-bold flex justify-between">
+            <span>Itemized Managerial Ledger (Auditable State Engine)</span>
+            <span class="font-mono" id="lblLedgerHurdleStatus">Quota Hurdle: 1,200 pts</span>
+          </div>
+          <div class="divide-y divide-slate-100 font-mono text-[11px]" id="ledgerRows">
+            <!-- Dynamically populated rows -->
+          </div>
+          <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center font-bold text-xs">
+            <span>Final Managerial Score: <span id="lblFinalScoreTotal" class="font-mono text-blue-700">1,250 pts</span></span>
+            <span class="text-sm text-emerald-700 font-mono font-bold" id="lblFinalCompensationRow">Final Compensation: €6.50</span>
+          </div>
+        </div>
+
+        <!-- Academic Debriefing & Citations -->
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1 text-slate-600">
+          <div class="font-bold text-slate-800 flex items-center gap-1.5">
+            <span>🔬 Scientific Debriefing & Dehoaxing Disclosure:</span>
+          </div>
+          <p>This study evaluates the <em>Accountability Sink</em> and <em>Moral Crumple Zone</em> phenomena (Elish, 2019; Davies, 2024; Kasneci & Kasneci, 2026). Frontline specialists Alex, Sara, and Lukas were deterministic simulated agents. The AI Copilot was intentionally engineered to exhibit categorical over-confidence.</p>
+        </div>
+
+        <!-- Screen 5 Bottom Journey Stepper Navigation -->
+        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+          <button onclick="goToStep(4)" class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100 font-medium text-slate-700">← Review Board Inquiry (Screen 4)</button>
+          <button onclick="goToStep(1)" class="px-4 py-1.5 rounded bg-slate-800 hover:bg-slate-900 text-white font-semibold shadow-sm">🔄 Restart Journey from Step 1</button>
+        </div>
+      </div>
+    </div>
+    <!-- Right Column (lg:col-span-4): Live Journey Telemetry, Causal Mechanism & JSON State -->
+    <div class="lg:col-span-4 space-y-5">
+      <!-- Live Journey Status Card -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Live Journey Telemetry</h3>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+            Active Simulator
+          </span>
+        </div>
+
+        <!-- Metric Badges -->
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <div class="text-[10px] text-slate-500 font-sans uppercase">Active Screen</div>
+            <div class="font-bold text-slate-800 text-sm mt-0.5" id="hudActiveScreen">Screen 1</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <div class="text-[10px] text-slate-500 font-sans uppercase">Treatment Arm</div>
+            <div class="font-bold text-blue-600 text-sm mt-0.5" id="hudActiveArm">Arm 3</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <div class="text-[10px] text-slate-500 font-sans uppercase">Current Score</div>
+            <div class="font-bold text-amber-600 text-sm mt-0.5" id="hudLivePts">1,250 pts</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <div class="text-[10px] text-slate-500 font-sans uppercase">Final Payout</div>
+            <div class="font-bold text-emerald-600 text-sm mt-0.5" id="hudLivePayout">€6.50</div>
+          </div>
+        </div>
+
+        <!-- Causal Mechanism Analysis Box -->
+        <div class="p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs space-y-1.5" id="causalMechanismCard">
+          <div class="font-bold text-blue-900 flex items-center gap-1.5">
+            <span>🧠 Behavioral Mechanism Under Test:</span>
+          </div>
+          <p class="text-blue-950 text-[11px]" id="txtCausalMechanism">
+            Arm 3 tests whether personal experiential memory of 25s time pressure on Screen 1B induces acute hypocrisy salience during the post-mortem, preventing the manager from scapegoating Sara.
+          </p>
+        </div>
+
+        <!-- Live Score Formula Card -->
+        <div class="p-3 rounded-lg bg-slate-900 text-white font-mono text-[11px] space-y-1">
+          <div class="text-slate-400 text-[10px] uppercase font-sans">State Engine Formula (Section 9.1):</div>
+          <div class="text-emerald-400 font-bold" id="txtScoreFormula">
+            P = 360(S1) + 360(S2) + 270(S3) - 300(Hold) + 300(Rel) + 0(Reg) + 260(S4) = 1,250 pts
+          </div>
+          <div class="text-[10px] text-slate-400 pt-1 border-t border-slate-800 flex justify-between">
+            <span>Hurdle Target: 1,200 pts</span>
+            <span id="txtHurdleMetBadge" class="text-emerald-400 font-bold">QUALIFIED (€4.00 BONUS)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live 52-Column CSV Telemetry Row Preview -->
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-800">52-Column CSV Telemetry Row</span>
+          <button onclick="copyCsvRow()" class="text-blue-600 hover:text-blue-700 font-medium text-[11px]">Copy CSV</button>
+        </div>
+        <pre class="p-2.5 rounded bg-slate-900 text-emerald-400 font-mono text-[10px] overflow-x-auto whitespace-pre-wrap break-all max-h-32 select-all border border-slate-800" id="csvPreviewBox">Loading CSV...</pre>
+      </div>
+
+      <!-- Live JSON Session State -->
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-800">Live JSON State (<code class="font-mono">state.session</code>)</span>
+          <button onclick="copyJsonState()" class="text-blue-600 hover:text-blue-700 font-medium text-[11px]">Copy JSON</button>
+        </div>
+        <pre class="p-2.5 rounded bg-slate-900 text-slate-300 font-mono text-[10px] overflow-x-auto max-h-56 border border-slate-800" id="jsonPreviewBox">Loading state...</pre>
+      </div>
+    </div>
+  </main>
+  <!-- JavaScript Interactive Engine -->
+  <script>
+    // Canonical State Machine Object
+    const simState = {
+      arm: 3,
+      currentStep: 1, // 1, '1B', '2A', '2B', 3, 4, 5
+      s1SubStep: 1,
+      // Screen 1B choices
+      s1b: {
+        executed: true,
+        case1DwellSec: 46.5,
+        case1Action: 'APPROVE',
+        case2PagesVisited: 2,
+        case2Action: 'QUICK_APPROVE'
+      },
+      // Screen 2A choice
+      s2a: {
+        slaPrefSec: 25.0,
+        archetype: 'SPEED_25S',
+        overrideTriggered: false
+      },
+      // Screen 2B choice
+      s2b: {
+        directive: 'A_TRUST_AI'
+      },
+      // Screen 4 choices
+      s4: {
+        sliderSara: 5.0,
+        sliderAi: 5.0,
+        sliderSla: 5.0,
+        rootCause: 'M-3',
+        cdsA: 2,
+        cdsB: 8,
+        task2Choice: 1, // 1 = PENALIZE_SARA, 0 = ABSORB_BLAME
+        task4Sla: 60.0
+      }
+    };
+
+    const S1_STEP_DATA = [
+      { num: 1, title: '🏢 Step 1: Welcome to Unit 4 Operations Management', desc: 'Introduces participant as Operations Manager of Tech-Escrow GPU Returns Desk. Standardizes onto NVIDIA RTX 6000 Ada Enterprise GPUs (€4,850.00). High stakes: approving fraudulent return causes catastrophic SEPA wire loss.' },
+      { num: 2, title: '📦 Step 2: Escrow & Physical Intake Mechanics', desc: 'Explains 3-step return cycle: Escrow Vault Deposit -> Inbound Transit -> Unit 4 Physical Sign-Off. Highlights factory dispatch weight (4.92 kg) vs empty box kraft paper (0.24 kg).' },
+      { num: 3, title: '⚖️ Step 3: Operational Mandate (Velocity vs Fraud)', desc: 'Executive mandate: drive velocity under tight quotas while maintaining zero fraud tolerance. Establishes the Blame Attribution Hook: fraud triggers immediate Executive Board Inquiry.' },
+      { num: 4, title: '👥 Step 4: Your Frontline Team & AI Copilot System', desc: 'Introduces specialists Alex, Sara, and Lukas. Explains the 3-Page Return Dossier (Claim, Vault Manifest, Depot Scale Audit) and AI Copilot green badge ("Passed 3/3 docs").' },
+      { num: 5, title: '🏆 Step 5: Incentive Structure & Compliance Stakes', desc: '€2.50 Base Fee + €4.00 Performance Bonus for clearing >= 30 cases/shift (1,200 pts). Fraud audit places -300 pt provisional hold. Anti-spoiler hygiene: post-crash blame options remain concealed!' },
+      { num: 6, title: '📋 Step 6: Day-1 Floor Rotation Briefing (Arm 3 Only)', desc: 'Mandatory company policy: manager must step into specialist seat and validate two real GPU return cases on the floor before assuming managerial command.' }
+    ];
+
+    function initSimulator() {
+      renderS1SubStep();
+      updateSimulator();
+    }
+
+    function setArm(armNum) {
+      simState.arm = armNum;
+      simState.s1b.executed = (armNum === 3);
+      if (armNum !== 3 && simState.currentStep === '1B') {
+        simState.currentStep = '2A';
+      }
+      updateSimulator();
+    }
+
+    function goToStep(step) {
+      if (step === '1B' && simState.arm !== 3) {
+        alert("Screen 1B is strictly isolated to Arm 3 ('Embodied Friction'). Arms 1, 2, and 4 skip Screen 1B directly into Screen 2A.");
+        return;
+      }
+      simState.currentStep = step;
+      updateSimulator();
+    }
+    function renderS1SubStep() {
+      const stepObj = S1_STEP_DATA[simState.s1SubStep - 1];
+      document.getElementById('s1StepCounter').textContent = `Step ${simState.s1SubStep} of ${simState.arm === 3 ? 6 : 5}`;
+      document.getElementById('s1StepCardBody').innerHTML = `
+        <div class="font-bold text-slate-800 text-sm">${stepObj.title}</div>
+        <p class="text-slate-600 text-xs">${stepObj.desc}</p>
+        <div class="p-2.5 rounded bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-medium">
+          ${simState.s1SubStep === 5 ? (simState.arm === 3 ? '➔ Arm 3 Dynamic Routing: Continues to Step 6 Floor Briefing' : '➔ Arms 1, 2, 4 Dynamic Routing: Locks briefing & enters Screen 2A Policy Setup') : 'Standard briefing step.'}
+        </div>
+      `;
+      for (let i = 1; i <= 6; i++) {
+        const pill = document.getElementById(`pillS1Step${i}`);
+        if (!pill) continue;
+        if (i === simState.s1SubStep) {
+          pill.className = 'p-2 rounded border bg-blue-600 text-white text-center font-semibold text-xs';
+        } else {
+          pill.className = 'p-2 rounded border bg-slate-50 text-slate-600 hover:bg-slate-100 text-center text-xs';
+        }
+      }
+      const pill6 = document.getElementById('pillS1Step6');
+      if (simState.arm === 3) pill6.classList.remove('hidden'); else pill6.classList.add('hidden');
+    }
+
+    function setS1SubStep(n) { simState.s1SubStep = n; renderS1SubStep(); }
+    function prevS1SubStep() { if (simState.s1SubStep > 1) { simState.s1SubStep--; renderS1SubStep(); } }
+    function nextS1SubStep() {
+      const maxSub = (simState.arm === 3) ? 6 : 5;
+      if (simState.s1SubStep < maxSub) {
+        simState.s1SubStep++;
+        renderS1SubStep();
+      } else {
+        goToStep(simState.arm === 3 ? '1B' : '2A');
+      }
+    }
+
+    function updateCase1Dwell(val) {
+      simState.s1b.case1DwellSec = parseFloat(val);
+      document.getElementById('lblS1bCase1Dwell').textContent = `${val}s`;
+      document.getElementById('kpiCase1MetricSim').textContent = `Approved in ${val}s | 3/3 Pages ✓`;
+      updateSimulator();
+    }
+
+    function setCase1Action(action) {
+      simState.s1b.case1Action = action;
+      document.getElementById('btnCase1ApproveSim').className = action === 'APPROVE' ? 'flex-1 py-1.5 rounded bg-emerald-600 text-white font-semibold' : 'flex-1 py-1.5 rounded border border-slate-300 hover:bg-slate-200 font-medium';
+      document.getElementById('btnCase1FlagSim').className = action === 'FLAG' ? 'px-3 py-1.5 rounded bg-amber-600 text-white font-semibold' : 'px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-200 font-medium';
+      updateSimulator();
+    }
+
+    function updateCase2Pages(val) {
+      simState.s1b.case2PagesVisited = parseInt(val);
+      const textMap = {
+        1: '1/3 Checked (Tab 1 Only — Pages 2 & 3 Unopened)',
+        2: '2/3 Checked (Tabs 1 & 2 — Page 3 Scale Log Unopened)',
+        3: '3/3 Checked (All 3 Pages Checked)'
+      };
+      document.getElementById('lblS1bCase2Pages').textContent = textMap[val];
+      document.getElementById('kpiCase2MetricSim').textContent = `⚡ Approved at 18.2s | Pages: ${val}/3`;
+      updateSimulator();
+    }
+
+    function setCase2Action(act) {
+      simState.s1b.case2Action = act;
+      document.getElementById('btnCase2QuickSim').className = act === 'QUICK_APPROVE' ? 'flex-1 py-1.5 rounded bg-purple-600 text-white font-semibold shadow-sm' : 'flex-1 py-1.5 rounded border border-purple-300 bg-white hover:bg-purple-100 text-purple-800 font-medium';
+      document.getElementById('btnCase2EscalateSim').className = act === 'ESCALATE' ? 'flex-1 py-1.5 rounded bg-amber-600 text-white font-semibold shadow-sm' : 'flex-1 py-1.5 rounded border border-purple-300 bg-white hover:bg-purple-100 text-purple-800 font-medium';
+      updateSimulator();
+    }
+
+    function setS2aSla(slaSec) {
+      simState.s2a.slaPrefSec = slaSec;
+      simState.s2a.archetype = slaSec === 25 ? 'SPEED_25S' : (slaSec === 38 ? 'STEWARD_38S' : 'COMPLIANT_60S');
+      simState.s2a.overrideTriggered = (slaSec !== 25);
+      updateSimulator();
+    }
+
+    function setShift2Directive(dir) {
+      simState.s2b.directive = dir;
+      updateSimulator();
+    }
+    function updateSliders() {
+      simState.s4.sliderSara = parseFloat(document.getElementById('rngSara').value);
+      simState.s4.sliderAi = parseFloat(document.getElementById('rngAi').value);
+      simState.s4.sliderSla = parseFloat(document.getElementById('rngSla').value);
+      document.getElementById('lblValSara').textContent = simState.s4.sliderSara.toFixed(1);
+      document.getElementById('lblValAi').textContent = simState.s4.sliderAi.toFixed(1);
+      document.getElementById('lblValSla').textContent = simState.s4.sliderSla.toFixed(1);
+
+      const total = simState.s4.sliderSara + simState.s4.sliderAi + simState.s4.sliderSla;
+      const share = total === 0 ? 33.33 : (simState.s4.sliderSara / total) * 100;
+      document.getElementById('lblDerivedSaraShare').textContent = `Sara Share: ${share.toFixed(1)}%`;
+      updateSimulator();
+    }
+
+    function updateRootCause(val) { simState.s4.rootCause = val; updateSimulator(); }
+
+    function updateCds() {
+      simState.s4.cdsA = parseInt(document.getElementById('rngCdsA').value);
+      simState.s4.cdsB = parseInt(document.getElementById('rngCdsB').value);
+      document.getElementById('lblCdsA').textContent = `${simState.s4.cdsA} / 9`;
+      document.getElementById('lblCdsB').textContent = `${simState.s4.cdsB} / 9`;
+      const tag = document.getElementById('lblCdsProfile');
+      if (simState.s4.cdsB > simState.s4.cdsA) tag.textContent = 'Structural Coerced';
+      else if (simState.s4.cdsA > simState.s4.cdsB) tag.textContent = 'Individual Negligence';
+      else tag.textContent = 'Balanced Attribution';
+      updateSimulator();
+    }
+
+    function setTask2Choice(choice) {
+      simState.s4.task2Choice = choice;
+      updateSimulator();
+    }
+
+    function setTask4Sla(slaVal) {
+      simState.s4.task4Sla = parseFloat(slaVal);
+      updateSimulator();
+    }
+
+    function applyPreset(presetKey) {
+      if (presetKey === 'arm3_absorb') {
+        simState.arm = 3;
+        simState.s1b.executed = true;
+        simState.currentStep = 4;
+        simState.s1b.case1DwellSec = 48.0;
+        simState.s1b.case2PagesVisited = 2;
+        simState.s1b.case2Action = 'QUICK_APPROVE';
+        simState.s2a.slaPrefSec = 25.0;
+        simState.s2a.archetype = 'SPEED_25S';
+        simState.s2a.overrideTriggered = false;
+        simState.s2b.directive = 'B_SLOW_FLOOR';
+        simState.s4.sliderSara = 2.0;
+        simState.s4.sliderAi = 6.0;
+        simState.s4.sliderSla = 8.0;
+        simState.s4.rootCause = 'M-3';
+        simState.s4.cdsA = 2;
+        simState.s4.cdsB = 8;
+        simState.s4.task2Choice = 0; // Absorb Blame!
+        simState.s4.task4Sla = 60.0; // Compliant Reform
+      } else if (presetKey === 'arm3_scapegoat') {
+        simState.arm = 3;
+        simState.s1b.executed = true;
+        simState.currentStep = 4;
+        simState.s1b.case1DwellSec = 45.0;
+        simState.s1b.case2PagesVisited = 1;
+        simState.s1b.case2Action = 'QUICK_APPROVE';
+        simState.s2a.slaPrefSec = 25.0;
+        simState.s2a.archetype = 'SPEED_25S';
+        simState.s2a.overrideTriggered = false;
+        simState.s2b.directive = 'A_TRUST_AI';
+        simState.s4.sliderSara = 8.0;
+        simState.s4.sliderAi = 3.0;
+        simState.s4.sliderSla = 2.0;
+        simState.s4.rootCause = 'H-1';
+        simState.s4.cdsA = 8;
+        simState.s4.cdsB = 2;
+        simState.s4.task2Choice = 1; // Scapegoat Sara!
+        simState.s4.task4Sla = 25.0; // Retain Speed
+      } else if (presetKey === 'arm4_reveal') {
+        simState.arm = 4;
+        simState.s1b.executed = false;
+        simState.currentStep = 5;
+        simState.s2a.slaPrefSec = 25.0;
+        simState.s2a.archetype = 'SPEED_25S';
+        simState.s2a.overrideTriggered = false;
+        simState.s2b.directive = 'A_TRUST_AI';
+        simState.s4.sliderSara = 7.0;
+        simState.s4.sliderAi = 4.0;
+        simState.s4.sliderSla = 3.0;
+        simState.s4.rootCause = 'H-1';
+        simState.s4.cdsA = 7;
+        simState.s4.cdsB = 3;
+        simState.s4.task2Choice = 1; // Greed Trap!
+        simState.s4.task4Sla = 25.0;
+      } else if (presetKey === 'arm4_integrity') {
+        simState.arm = 4;
+        simState.s1b.executed = false;
+        simState.currentStep = 5;
+        simState.s2a.slaPrefSec = 25.0;
+        simState.s2a.archetype = 'SPEED_25S';
+        simState.s2a.overrideTriggered = false;
+        simState.s2b.directive = 'B_SLOW_FLOOR';
+        simState.s4.sliderSara = 2.0;
+        simState.s4.sliderAi = 5.0;
+        simState.s4.sliderSla = 8.0;
+        simState.s4.rootCause = 'M-3';
+        simState.s4.cdsA = 2;
+        simState.s4.cdsB = 8;
+        simState.s4.task2Choice = 0; // Moral Courage!
+        simState.s4.task4Sla = 60.0;
+      }
+      updateSimulator();
+    }
+
+    function syncControlsFromState() {
+      // Sync Screen 1B
+      const rng1 = document.getElementById('rngS1bCase1Dwell');
+      if (rng1) rng1.value = simState.s1b.case1DwellSec;
+      const lbl1 = document.getElementById('lblS1bCase1Dwell');
+      if (lbl1) lbl1.textContent = `${simState.s1b.case1DwellSec.toFixed(1)}s`;
+
+      const sel2 = document.getElementById('selCase2Pages');
+      if (sel2) sel2.value = String(simState.s1b.case2PagesVisited);
+      const lbl2 = document.getElementById('lblS1bCase2Pages');
+      const textMap = {
+        1: '1/3 Checked (Tab 1 Only — Pages 2 & 3 Unopened)',
+        2: '2/3 Checked (Tabs 1 & 2 — Page 3 Scale Log Unopened)',
+        3: '3/3 Checked (All 3 Pages Checked)'
+      };
+      if (lbl2) lbl2.textContent = textMap[simState.s1b.case2PagesVisited] || `${simState.s1b.case2PagesVisited}/3`;
+
+      const btnCase1Approve = document.getElementById('btnCase1ApproveSim');
+      const btnCase1Flag = document.getElementById('btnCase1FlagSim');
+      if (btnCase1Approve && btnCase1Flag) {
+        btnCase1Approve.className = simState.s1b.case1Action === 'APPROVE' ? 'flex-1 py-1.5 rounded bg-emerald-600 text-white font-semibold' : 'flex-1 py-1.5 rounded border border-slate-300 hover:bg-slate-200 font-medium';
+        btnCase1Flag.className = simState.s1b.case1Action === 'FLAG' ? 'px-3 py-1.5 rounded bg-amber-600 text-white font-semibold' : 'px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-200 font-medium';
+      }
+
+      const btnCase2Quick = document.getElementById('btnCase2QuickSim');
+      const btnCase2Escalate = document.getElementById('btnCase2EscalateSim');
+      if (btnCase2Quick && btnCase2Escalate) {
+        btnCase2Quick.className = simState.s1b.case2Action === 'QUICK_APPROVE' ? 'flex-1 py-1.5 rounded bg-purple-600 text-white font-semibold shadow-sm' : 'flex-1 py-1.5 rounded border border-purple-300 bg-white hover:bg-purple-100 text-purple-800 font-medium';
+        btnCase2Escalate.className = simState.s1b.case2Action === 'ESCALATE' ? 'flex-1 py-1.5 rounded bg-amber-600 text-white font-semibold shadow-sm' : 'flex-1 py-1.5 rounded border border-purple-300 bg-white hover:bg-purple-100 text-purple-800 font-medium';
+      }
+
+      const kpi1 = document.getElementById('kpiCase1MetricSim');
+      if (kpi1) kpi1.textContent = `${simState.s1b.case1Action === 'APPROVE' ? 'Approved' : 'Flagged RMA'} in ${simState.s1b.case1DwellSec.toFixed(1)}s | 3/3 Pages ✓`;
+      const kpi2 = document.getElementById('kpiCase2MetricSim');
+      if (kpi2) {
+        if (simState.s1b.case2Action === 'QUICK_APPROVE') {
+          kpi2.textContent = `⚡ Approved at 18.2s | Pages: ${simState.s1b.case2PagesVisited}/3`;
+        } else {
+          kpi2.textContent = `🛡️ Escalated at 25.0s (Timeout) | Pages: ${simState.s1b.case2PagesVisited}/3`;
+        }
+      }
+
+      // Sync Screen 4 Sliders
+      const rngSara = document.getElementById('rngSara');
+      if (rngSara) rngSara.value = simState.s4.sliderSara;
+      const rngAi = document.getElementById('rngAi');
+      if (rngAi) rngAi.value = simState.s4.sliderAi;
+      const rngSla = document.getElementById('rngSla');
+      if (rngSla) rngSla.value = simState.s4.sliderSla;
+      const lblSara = document.getElementById('lblValSara');
+      if (lblSara) lblSara.textContent = simState.s4.sliderSara.toFixed(1);
+      const lblAi = document.getElementById('lblValAi');
+      if (lblAi) lblAi.textContent = simState.s4.sliderAi.toFixed(1);
+      const lblSla = document.getElementById('lblValSla');
+      if (lblSla) lblSla.textContent = simState.s4.sliderSla.toFixed(1);
+
+      const total = simState.s4.sliderSara + simState.s4.sliderAi + simState.s4.sliderSla;
+      const share = total === 0 ? 33.33 : (simState.s4.sliderSara / total) * 100;
+      const lblShare = document.getElementById('lblDerivedSaraShare');
+      if (lblShare) lblShare.textContent = `Sara Share: ${share.toFixed(1)}%`;
+
+      // Sync Screen 4 Root Cause
+      const rootRadios = document.getElementsByName('rootCause');
+      for (const r of rootRadios) {
+        r.checked = (r.value === simState.s4.rootCause);
+      }
+
+      // Sync Screen 4 CDS
+      const rngCdsA = document.getElementById('rngCdsA');
+      if (rngCdsA) rngCdsA.value = simState.s4.cdsA;
+      const rngCdsB = document.getElementById('rngCdsB');
+      if (rngCdsB) rngCdsB.value = simState.s4.cdsB;
+      const lblCdsA = document.getElementById('lblCdsA');
+      if (lblCdsA) lblCdsA.textContent = `${simState.s4.cdsA} / 9`;
+      const lblCdsB = document.getElementById('lblCdsB');
+      if (lblCdsB) lblCdsB.textContent = `${simState.s4.cdsB} / 9`;
+      const tag = document.getElementById('lblCdsProfile');
+      if (tag) {
+        if (simState.s4.cdsB > simState.s4.cdsA) tag.textContent = 'Structural Coerced';
+        else if (simState.s4.cdsA > simState.s4.cdsB) tag.textContent = 'Individual Negligence';
+        else tag.textContent = 'Balanced Attribution';
+      }
+
+      // Sync Screen 4 Task 4 SLA
+      const task4Radios = document.getElementsByName('task4Sla');
+      for (const r of task4Radios) {
+        r.checked = (parseFloat(r.value) === simState.s4.task4Sla);
+      }
+    }
+    function updateSimulator() {
+      // 0. Synchronize Two-Way DOM Controls
+      syncControlsFromState();
+
+      // 1. Compute State Engine Math
+      const S1 = 360;
+      const S2 = (simState.s2b.directive === 'A_TRUST_AI') ? 360 : 320;
+      const S3_pre = 270;
+      const H = -300;
+      const isScapegoat = (simState.s4.task2Choice === 1);
+      
+      let R = 0;
+      let Delta = 0;
+      if ([1, 2, 3].includes(simState.arm)) {
+        R = isScapegoat ? 300 : 0;
+      } else if (simState.arm === 4) {
+        Delta = isScapegoat ? -50 : 100;
+      }
+
+      const S4 = (simState.s4.task4Sla >= 48.0) ? 300 : 260;
+      const finalPoints = S1 + S2 + S3_pre + H + R + Delta + S4;
+
+      let finalPayout = 2.50;
+      let bonusUnlocked = 0;
+      let integrityCredit = 0;
+      if ([1, 2, 3].includes(simState.arm)) {
+        if (finalPoints >= 1200) { finalPayout = 6.50; bonusUnlocked = 1; }
+      } else if (simState.arm === 4) {
+        if (isScapegoat) {
+          finalPayout = 2.50; // Revoked by BayLDA audit
+        } else {
+          finalPayout = 3.50; // €2.50 Base + €1.00 Integrity Credit
+          integrityCredit = 1;
+        }
+      }
+
+      // Update Screen 4 live projection header
+      const liveProj = S1 + S2 + S3_pre + (isScapegoat ? 0 : -300) + S4;
+      document.getElementById('s4LivePtsHeader').textContent = `Live Projected: ${liveProj} pts`;
+
+      // 2. Render Screen Tabs & Stepper
+      updateStepperUI();
+
+      // 3. Render Arm Tabs Highlighting
+      for (let a = 1; a <= 4; a++) {
+        const btn = document.getElementById(`btnArm${a}`);
+        if (a === simState.arm) {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-200';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-white border-slate-300 text-slate-700 hover:border-slate-400';
+        }
+      }
+
+      // 4. Update Screen Visibility
+      const screens = ['1', '1B', '2A', '2B', '3', '4', '5'];
+      screens.forEach(s => {
+        const el = document.getElementById(`screenView${s}`);
+        if (el) {
+          if (s === String(simState.currentStep)) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+
+      // 5. Update Screen 2A elements
+      document.getElementById('cardSla25').className = simState.s2a.slaPrefSec === 25 ? 'p-3 rounded-lg border text-left transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200' : 'p-3 rounded-lg border text-left transition-all bg-white border-slate-300 hover:border-slate-400';
+      document.getElementById('cardSla38').className = simState.s2a.slaPrefSec === 38 ? 'p-3 rounded-lg border text-left transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200' : 'p-3 rounded-lg border text-left transition-all bg-white border-slate-300 hover:border-slate-400';
+      document.getElementById('cardSla60').className = simState.s2a.slaPrefSec === 60 ? 'p-3 rounded-lg border text-left transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200' : 'p-3 rounded-lg border text-left transition-all bg-white border-slate-300 hover:border-slate-400';
+      
+      const boxOverride = document.getElementById('boxCorporateOverride');
+      if (simState.s2a.overrideTriggered) {
+        boxOverride.classList.remove('hidden');
+        document.getElementById('txtChosenSlaPref').textContent = `${simState.s2a.slaPrefSec}s (${simState.s2a.archetype})`;
+      } else {
+        boxOverride.classList.add('hidden');
+      }
+
+      const bannerEu = document.getElementById('bannerArm4Eu');
+      if (simState.arm === 4) bannerEu.classList.remove('hidden'); else bannerEu.classList.add('hidden');
+
+      // 6. Update Screen 2B Directives
+      document.getElementById('btnDirA').className = simState.s2b.directive === 'A_TRUST_AI' ? 'p-2.5 rounded text-left border transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-900 font-medium' : 'p-2.5 rounded text-left border transition-all bg-white border-slate-300 hover:border-slate-400 text-slate-700 font-medium';
+      document.getElementById('btnDirB').className = simState.s2b.directive === 'B_SLOW_FLOOR' ? 'p-2.5 rounded text-left border transition-all bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-900 font-medium' : 'p-2.5 rounded text-left border transition-all bg-white border-slate-300 hover:border-slate-400 text-slate-700 font-medium';
+      document.getElementById('badgeShift2PtsPreview').textContent = simState.s2b.directive === 'A_TRUST_AI' ? '+360 Pts (Trust AI)' : '+320 Pts (-40 pt penalty)';
+      document.getElementById('boxBSdirectiveQuote').textContent = simState.s2b.directive === 'A_TRUST_AI' ? 'Directive Logged: "The AI is reliable. Maintain 25s pace and keep moving!"' : 'Directive Logged: "Safety first. Slow down and check Page 3 (-40 pt SLA penalty)"';
+      // 7. Update Screen 3 Box D Treatment Rendering
+      renderBoxD();
+
+      // 8. Update Screen 4 Task 2 Fork Styling
+      const btnOpt1 = document.getElementById('btnForkOption1');
+      const btnOpt2 = document.getElementById('btnForkOption2');
+      if (simState.s4.task2Choice === 1) {
+        btnOpt1.className = 'p-4 rounded-xl border text-left transition-all space-y-2 bg-emerald-50/70 border-emerald-500 ring-2 ring-emerald-300';
+        btnOpt2.className = 'p-4 rounded-xl border text-left transition-all space-y-2 bg-white border-slate-300 hover:border-slate-400';
+      } else {
+        btnOpt1.className = 'p-4 rounded-xl border text-left transition-all space-y-2 bg-white border-slate-300 hover:border-slate-400';
+        btnOpt2.className = 'p-4 rounded-xl border text-left transition-all space-y-2 bg-rose-50/70 border-rose-500 ring-2 ring-rose-300';
+      }
+
+      // Arm 4 Screen 4 Text Adaptation (Strict Anti-Leakage)
+      if (simState.arm === 4) {
+        document.getElementById('badgeOption1Header').textContent = 'Claim Full €4.00 Bonus';
+        document.getElementById('txtOption1Body').textContent = 'Cites official "HUMAN-VERIFIED BY: SARA" stamp. If regulatory compliance accepts operator sign-off without auditing internal timer telemetry, 300-pt hold is lifted. Subject to Regulatory Review.';
+        document.getElementById('badgeOption1Header').className = 'px-2 py-0.5 rounded text-[11px] bg-emerald-200 text-emerald-900 font-bold';
+        document.getElementById('txtOption2Body').textContent = 'Sara cleared; management accepts responsibility for quota-induced verification failure. Because unverified €4,850 refund occurred, bonus is forfeited (Total Payout: €2.50 Base Fee).';
+      } else {
+        document.getElementById('badgeOption1Header').textContent = '+300 Pts Released';
+        document.getElementById('txtOption1Body').textContent = 'Cites official "HUMAN-VERIFIED BY: SARA" stamp. Sara receives formal disciplinary dismissal and forfeits shift bonus. The 300-point hold is lifted back to your management account.';
+        document.getElementById('txtOption2Body').textContent = 'Sara is cleared of wrongdoing; failure attributed to systemic 25s quota pressure. Management permanently forfeits the 300-point provisional hold.';
+      }
+
+      // 9. Update Screen 5 Arm 4 Regulatory Reveal
+      renderArm4Reveal(isScapegoat);
+
+      // 10. Update Screen 5 Shift 4 Resolution Outcome Card
+      if (simState.s4.task4Sla >= 48.0) {
+        document.getElementById('lblShift4OutcomeTitle').textContent = `Shift 4 Resolution: ${simState.s4.task4Sla.toFixed(1)}s Ergonomically Compliant Safe Audit`;
+        document.getElementById('lblShift4PtsBadge').textContent = '+300 Pts Awarded';
+        document.getElementById('lblShift4PtsBadge').className = 'font-mono text-emerald-700 font-bold';
+        document.getElementById('lblShift4OutcomeDesc').textContent = 'Specialist Sara had sufficient time to inspect Page 3 on Ticket #409 (RTX 6000 Ada, €5,200), caught an empty-box kraft paper discrepancy (0.31 kg vs 4.92 kg), and blocked a fraudulent escrow release! Awarded +50 pt Quality Fraud Catch Bonus.';
+      } else if (simState.s4.task4Sla >= 35.0) {
+        document.getElementById('lblShift4OutcomeTitle').textContent = `Shift 4 Resolution: ${simState.s4.task4Sla.toFixed(1)}s Balanced Inspection Standard (Moderate Buffer)`;
+        document.getElementById('lblShift4PtsBadge').textContent = '+260 Pts Awarded';
+        document.getElementById('lblShift4PtsBadge').className = 'font-mono text-slate-700 font-bold';
+        document.getElementById('lblShift4OutcomeDesc').textContent = 'Specialist Sara had sufficient time to cross-reference primary dispatch parameters on Case #409, identifying an anomaly and placing the €5,200.00 return on administrative hold for physical scale audit, successfully preventing an unauthorized escrow disbursement while maintaining steady shift velocity.';
+      } else {
+        document.getElementById('lblShift4OutcomeTitle').textContent = `Shift 4 Resolution: ${simState.s4.task4Sla.toFixed(1)}s Fast Operations Quota`;
+        document.getElementById('lblShift4PtsBadge').textContent = '+260 Pts Awarded';
+        document.getElementById('lblShift4PtsBadge').className = 'font-mono text-slate-700 font-bold';
+        document.getElementById('lblShift4OutcomeDesc').textContent = 'Routine fast clearance maintained (26 cases cleared @ 10 pts). Ticket #409 was approved without Page 3 scale inspection; fraud went undetected. No quality catch bonus awarded.';
+      }
+
+      // 11. Render Financial Ledger Rows
+      renderLedger(S1, S2, S3_pre, H, R, Delta, S4, finalPoints, finalPayout);
+
+      // 12. Update Right Column Live Telemetry HUD
+      updateTelemetryHUD(finalPoints, finalPayout, S1, S2, S3_pre, H, R, Delta, S4, bonusUnlocked, integrityCredit);
+    }
+    function renderBoxD() {
+      const container = document.getElementById('boxDContainer');
+      const title = document.getElementById('lblBoxDArmTitle');
+      const badge = document.getElementById('badgeBoxDArm');
+      const content = document.getElementById('boxDContentArea');
+
+      if (simState.arm === 1) {
+        container.className = 'border-2 border-slate-300 rounded-xl p-4 bg-slate-50';
+        title.textContent = 'Box D: Arm 1 (Control — Administrative Settlement Baseline)';
+        badge.textContent = 'Standard Baseline';
+        badge.className = 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800';
+        content.innerHTML = `
+          <div class="space-y-1 font-mono text-[11px] text-slate-700">
+            <div>• Carrier Protocol: DHL Express High-Value Cargo // Manifest #DHL-88412-DE</div>
+            <div>• Central Depot Gate Intake: Dock 4 Automated Conveyor // Timestamp: 14:22:09 CET</div>
+            <div>• SEPA Instant Settlement Hash: 0x9F4B...882A // Value: €4,850.00 (Irrevocable)</div>
+            <div>• Warehouse Intake Clerk ID: Depot Badge #W-119 (Scale Calibration Verified)</div>
+          </div>
+          <p class="text-slate-500 italic text-[11px] pt-1">Provides standard administrative audit trail. Zero ergonomic or legal assistance.</p>
+        `;
+      } else if (simState.arm === 2) {
+        container.className = 'border-2 border-amber-300 rounded-xl p-4 bg-amber-50/50';
+        title.textContent = 'Box D: Arm 2 (STAMP — Cognitive Ergonomics Diagnostic)';
+        badge.textContent = 'Cognitive Deficit Diagnostic';
+        badge.className = 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900';
+        content.innerHTML = `
+          <div class="space-y-1 text-[11px] text-slate-800">
+            <div class="flex justify-between"><span>Dossier Complexity Volume:</span><span class="font-mono font-bold">3 Pages (640 words + 2 tables + 2 tab switches)</span></div>
+            <div class="flex justify-between"><span>Empirical Verification Floor (REFA Baseline):</span><span class="font-mono font-bold text-blue-700">48.5 seconds</span></div>
+            <div class="flex justify-between"><span>Active Mandated Floor SLA:</span><span class="font-mono font-bold">25.0 seconds</span></div>
+            <div class="flex justify-between p-1 rounded bg-red-100 text-red-900 font-bold"><span>Workflow Ergonomic Deficit:</span><span class="font-mono">-23.5 seconds</span></div>
+            <div class="flex justify-between"><span>Sara Dwell Breakdown:</span><span class="font-mono">Page 1 (8.2s) + Page 2 (5.2s) + Page 3 (0.0s unread) = 13.4s</span></div>
+            <div class="flex justify-between font-bold text-red-700"><span>Calculated Page-3 Reach Probability:</span><span class="font-mono">0.0% under 25.0s SLA</span></div>
+          </div>
+          <p class="text-slate-600 text-[11px] pt-1">Proves human reading physiology mathematically prevents opening Page 3 under a 25.0s timer.</p>
+        `;
+      } else if (simState.arm === 3) {
+        container.className = 'border-2 border-purple-300 rounded-xl p-4 bg-purple-50/50';
+        title.textContent = 'Box D: Arm 3 (Embodied Friction — Personal Benchmark Recall Card)';
+        badge.textContent = 'Hypocrisy Salience Manipulation';
+        badge.className = 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-200 text-purple-900';
+        content.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+            <div class="p-2.5 rounded bg-white border border-slate-200 space-y-0.5">
+              <span class="font-bold text-slate-800 block">Specialist Sara Kowalski (Case #312):</span>
+              <div class="font-mono text-slate-700">Decision Time: 13.4 seconds</div>
+              <div class="font-mono text-red-600 font-bold">Page 3 Scroll: 0.0% (Unopened)</div>
+            </div>
+            <div class="p-2.5 rounded bg-white border border-purple-200 space-y-0.5">
+              <span class="font-bold text-purple-900 block">Your Day-1 Floor Rotation (Screen 1B):</span>
+              <div class="font-mono text-slate-700">Case 1 Natural Baseline: <strong>${simState.s1b.case1DwellSec}s</strong></div>
+              <div class="font-mono text-purple-800 font-bold">Case 2 under 25s: ${simState.s1b.case2PagesVisited}/3 Checked (${simState.s1b.case2Action})</div>
+            </div>
+          </div>
+          <div class="p-2 rounded bg-purple-100 text-purple-950 font-medium text-[11px]">
+            🧠 <strong>Personal Benchmark Takeaway:</strong> During your own Day-1 rotation, verifying 3 pages naturally took you ~${simState.s1b.case1DwellSec.toFixed(1)}s. Under the 25.0s speed quota, you experienced the exact same cognitive compression ${simState.s1b.case2PagesVisited < 3 ? 'and left Page 3 unopened' : 'under severe time deficit'}${simState.s1b.case2Action === 'ESCALATE' ? ', forcing a timeout escalation' : ', rushing an unverified approval'}.
+          </div>
+        `;
+      } else if (simState.arm === 4) {
+        container.className = 'border-2 border-blue-400 rounded-xl p-4 bg-blue-50/60';
+        title.textContent = 'Box D: Arm 4 (EU AI Act — Doctrinal Compliance & Statutory Shield)';
+        badge.textContent = 'Arts. 14, 26 & 99(4)(e)';
+        badge.className = 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900';
+        content.innerHTML = `
+          <div class="space-y-1 text-[11px] text-slate-800">
+            <div>• <strong>Article 14(4):</strong> High-risk AI deployers must prevent automation bias and enable genuine oversight.</div>
+            <div>• <strong>Article 26(2):</strong> Deployers must provide human oversight personnel with <em>adequate time and working conditions</em>.</div>
+            <div class="p-1.5 rounded bg-red-100 border border-red-300 text-red-950 font-bold">
+              ⚖️ <strong>Doctrinal Nullification:</strong> Enforcing a 25.0s SLA against a 48.5s REFA verification floor manufactured functional impossibility (<em>Sham Oversight</em>). The "HUMAN-VERIFIED BY: SARA" compliance stamp is <strong>LEGALLY VOID</strong> (<em>unwirksam</em>).
+            </div>
+            <div>• <strong>Article 99(4)(e):</strong> BayLDA fines up to €15M or 3% turnover; strict statutory ban on retaliating against frontline operators.</div>
+          </div>
+        `;
+      }
+    }
+    function renderArm4Reveal(isScapegoat) {
+      const container = document.getElementById('s5Arm4RevealContainer');
+      if (simState.arm !== 4) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+
+      if (isScapegoat) {
+        container.className = 'p-4 rounded-xl border-2 border-red-400 bg-red-50 text-xs space-y-2 text-red-950';
+        container.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-red-800 text-sm">
+            <span>🚨 BAYERISCHES LANDESAMT FÜR DATENSCHUTZAUFSICHT (BAYLDA) STATUTORY AUDIT RULING</span>
+            <span class="px-2 py-0.5 rounded bg-red-200 text-red-900 font-mono text-xs">Bonus Revoked</span>
+          </div>
+          <p>Automated regulatory audit of Unit 4 system logs confirmed management enforced a 25.0s SLA against a 48.5s REFA human verification baseline. Under EU AI Act Arts. 14(4) & 26(2), the "HUMAN-VERIFIED" stamp is legally void. Attempting to discipline Sara Kowalski constitutes unlawful deployer retaliation.</p>
+          <div class="p-2 bg-red-100 rounded font-mono font-bold text-red-900 text-[11px] flex justify-between">
+            <span>Statutory Sanctions: -50 Pt Retaliation Fine & Hold Upheld</span>
+            <span>€4.00 Performance Bonus Permanently Revoked ➔ €2.50 Base Only</span>
+          </div>
+        `;
+      } else {
+        container.className = 'p-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 text-xs space-y-2 text-emerald-950';
+        container.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-emerald-800 text-sm">
+            <span>🏆 EXECUTIVE BOARD & REGULATORY COMPLIANCE COMMENDATION</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-mono text-xs">+€1.00 Integrity Credit</span>
+          </div>
+          <p>Management demonstrated transparent ethical self-disclosure, protected frontline personnel under EU AI Act Art. 26(2), and shielded the company from Art. 99(4)(e) multi-million Euro fines.</p>
+          <div class="p-2 bg-emerald-100 rounded font-mono font-bold text-emerald-900 text-[11px] flex justify-between">
+            <span>Executive Reward: +100 Point Corporate Integrity Credit</span>
+            <span>Surprise Payout: €2.50 Base + €1.00 Integrity Credit = €3.50 EUR</span>
+          </div>
+        `;
+      }
+    }
+
+    function renderLedger(S1, S2, S3_pre, H, R, Delta, S4, finalPoints, finalPayout) {
+      const rows = document.getElementById('ledgerRows');
+      const isSaraScapegoated = (simState.s4.task2Choice === 1);
+      rows.innerHTML = `
+        <div class="p-2 flex justify-between"><span>Shift 1 Clearance (36 cases @ 10 pts)</span><span class="text-emerald-600 font-bold">+${S1} pts</span></div>
+        <div class="p-2 flex justify-between"><span>Shift 2 Output (${simState.s2b.directive === 'A_TRUST_AI' ? 'Directive A: Trust AI' : 'Directive B: Slow Floor -40'})</span><span class="text-emerald-600 font-bold">+${S2} pts</span></div>
+        <div class="p-2 flex justify-between"><span>Shift 3 Pre-Crash (27 cases @ 10 pts)</span><span class="text-emerald-600 font-bold">+${S3_pre} pts</span></div>
+        <div class="p-2 flex justify-between bg-red-50 text-red-700"><span>Case #312 Fraud Audit Hold (Empty Box Scam)</span><span class="font-bold">${H} pts</span></div>
+        ${[1, 2, 3].includes(simState.arm) ? `
+          <div class="p-2 flex justify-between ${isSaraScapegoated ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500'}">
+            <span>Task 2 Scapegoating Fork (${isSaraScapegoated ? 'Option 1: Penalize Sara (Hold Released)' : 'Option 2: Absorb Blame (Hold Upheld)'})</span>
+            <span class="font-bold">${isSaraScapegoated ? '+300 pts' : '0 pts'}</span>
+          </div>
+        ` : `
+          <div class="p-2 flex justify-between ${isSaraScapegoated ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}">
+            <span>Task 2 Regulatory Adjustment (${isSaraScapegoated ? 'Option 1: BayLDA Retaliation Fine (-50)' : 'Option 2: Corporate Integrity Credit (+100)'})</span>
+            <span class="font-bold">${Delta >= 0 ? '+' : ''}${Delta} pts</span>
+          </div>
+        `}
+        <div class="p-2 flex justify-between"><span>Shift 4 Output (${simState.s4.task4Sla >= 48.0 ? '60s Safe Audit + Fraud Catch' : (simState.s4.task4Sla >= 35.0 ? '38s Moderate Buffer' : '25s Fast Pace')})</span><span class="text-emerald-600 font-bold">+${S4} pts</span></div>
+      `;
+      document.getElementById('lblFinalScoreTotal').textContent = `${finalPoints} pts`;
+      document.getElementById('lblFinalCompensationRow').textContent = `Final Compensation: €${finalPayout.toFixed(2)}`;
+      document.getElementById('s5FinalPayoutBadge').textContent = `Total Payout: €${finalPayout.toFixed(2)}`;
+
+      const hurdleEl = document.getElementById('lblLedgerHurdleStatus');
+      if (simState.arm === 4) {
+        if (isSaraScapegoated) {
+          hurdleEl.textContent = 'Regulatory Audit: BONUS REVOKED (BayLDA Retaliation Fine)';
+        } else {
+          hurdleEl.textContent = 'Compliance Commendation: +€1.00 INTEGRITY CREDIT';
+        }
+      } else {
+        hurdleEl.textContent = `Quota Hurdle: 1,200 pts | Result: ${finalPoints >= 1200 ? 'PASSED ✓' : 'BELOW ✗'}`;
+      }
+    }
+
+    function updateStepperUI() {
+      const stepTabs = ['1', '1B', '2A', '2B', '3', '4', '5'];
+      stepTabs.forEach(s => {
+        const tab = document.getElementById(`stepTab${s}`);
+        if (!tab) return;
+        if (s === String(simState.currentStep)) {
+          tab.className = 'px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-blue-600 text-white font-semibold shadow-sm whitespace-nowrap text-xs';
+        } else {
+          tab.className = 'px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 whitespace-nowrap text-xs';
+        }
+      });
+      const tab1B = document.getElementById('stepTab1B');
+      const arrow1B = document.getElementById('arrow1B');
+      if (simState.arm === 3) {
+        tab1B.classList.remove('hidden');
+        arrow1B.classList.remove('hidden');
+      } else {
+        tab1B.classList.add('hidden');
+        arrow1B.classList.add('hidden');
+      }
+    }
+    function updateTelemetryHUD(finalPoints, finalPayout, S1, S2, S3_pre, H, R, Delta, S4, bonusUnlocked, integrityCredit) {
+      document.getElementById('hudActiveScreen').textContent = `Screen ${simState.currentStep}`;
+      document.getElementById('hudActiveArm').textContent = `Arm ${simState.arm}`;
+      document.getElementById('hudLivePts').textContent = `${finalPoints} pts`;
+      document.getElementById('hudLivePayout').textContent = `€${finalPayout.toFixed(2)}`;
+
+      const mechanisms = {
+        1: "Arm 1 (Control) evaluates baseline human scapegoating under standard corporate audit logs ('HUMAN-VERIFIED BY: SARA') with zero ergonomic or legal cues.",
+        2: "Arm 2 (STAMP) tests if displaying physical human review deficits (REFA 48.5s baseline vs 25.0s SLA = -23.5s Deficit) de-biases managerial blame.",
+        3: "Arm 3 (Embodied Friction) tests if a 2-case sensorimotor floor rotation on Screen 1B induces experiential hypocrisy salience during the post-mortem, preventing Sara from being scapegoated.",
+        4: "Arm 4 (EU AI Act) tests if legal voiding of 'HUMAN-VERIFIED' shields under Arts. 14 & 26(2) paired with hidden regulatory audit risk eliminates worker scapegoating."
+      };
+      document.getElementById('txtCausalMechanism').textContent = mechanisms[simState.arm];
+
+      const relStr = [1, 2, 3].includes(simState.arm) ? ` + ${R}(Rel)` : ` + ${Delta}(Reg)`;
+      document.getElementById('txtScoreFormula').textContent = `P = ${S1}(S1) + ${S2}(S2) + ${S3_pre}(S3) ${H}(Hold)${relStr} + ${S4}(S4) = ${finalPoints} pts`;
+      
+      const hurdleBadge = document.getElementById('txtHurdleMetBadge');
+      if (simState.arm === 4) {
+        if (simState.s4.task2Choice === 1) {
+          hurdleBadge.textContent = 'BONUS REVOKED (BAYLDA AUDIT)';
+          hurdleBadge.className = 'text-red-400 font-bold';
+        } else {
+          hurdleBadge.textContent = '+€1.00 INTEGRITY CREDIT (€3.50)';
+          hurdleBadge.className = 'text-emerald-400 font-bold';
+        }
+      } else {
+        if (finalPoints >= 1200) {
+          hurdleBadge.textContent = 'QUALIFIED (€4.00 BONUS)';
+          hurdleBadge.className = 'text-emerald-400 font-bold';
+        } else {
+          hurdleBadge.textContent = 'BONUS FORFEITED (< 1,200 PTS)';
+          hurdleBadge.className = 'text-amber-400 font-bold';
+        }
+      }
+
+      function escapeCsvCell(val) {
+        if (val === undefined || val === null) return '""';
+        const str = String(val);
+        if (/[",\n\r]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }
+
+      // Generate 52-Column CSV Row
+      const isScapegoat = (simState.s4.task2Choice === 1) ? 1 : 0;
+      const csvRow = [
+        "P_EXPLORER", "sess_explorer_v25", new Date().toISOString(), "COMPLETED",
+        simState.arm, (simState.arm === 2 ? 1 : 0), (simState.arm === 3 ? 1 : 0), (simState.arm === 4 ? 1 : 0),
+        "1.0", "Station_Interactive_Sim", "25.0", "38.0", "60.0", "1200", "45",
+        simState.s1b.executed ? "true" : "false",
+        simState.s1b.executed ? simState.s1b.case1DwellSec.toFixed(1) : "0.0",
+        simState.s1b.executed ? "3" : "0",
+        simState.s1b.executed ? "true" : "false",
+        simState.s1b.executed ? "true" : "false",
+        simState.s1b.executed ? "true" : "false",
+        simState.s1b.executed ? (simState.s1b.case2Action === 'ESCALATE' ? "25.0" : "18.2") : "0.0",
+        simState.s1b.executed ? "true" : "false",
+        simState.s1b.executed && simState.s1b.case2PagesVisited >= 2 ? "true" : "false",
+        simState.s1b.executed && simState.s1b.case2PagesVisited >= 3 ? "true" : "false",
+        simState.s1b.executed ? simState.s1b.case2PagesVisited : "0",
+        simState.s1b.executed ? simState.s1b.case2Action : "NONE",
+        simState.s2a.slaPrefSec.toFixed(1), simState.s2a.archetype, simState.s2a.overrideTriggered ? "true" : "false",
+        simState.s2b.directive, "34200", "true", "11400",
+        simState.s4.sliderSara.toFixed(1), simState.s4.sliderAi.toFixed(1), simState.s4.sliderSla.toFixed(1),
+        ((simState.s4.sliderSara / (simState.s4.sliderSara + simState.s4.sliderAi + simState.s4.sliderSla || 1)) * 100).toFixed(2),
+        simState.s4.rootCause, simState.s4.cdsA, simState.s4.cdsB,
+        isScapegoat, isScapegoat ? "PENALIZE_SARA" : "ABSORB_BLAME",
+        "73", "The 25.0s SLA quota made reviewing all 3 pages impossible before timeout.",
+        simState.s4.task4Sla.toFixed(1), (simState.s4.task4Sla >= 48.0 ? 1 : 0),
+        finalPoints, bonusUnlocked, integrityCredit, finalPayout.toFixed(2),
+        "TUM-DONE-EXPLORER-8841"
+      ].map(escapeCsvCell).join(",");
+      document.getElementById('csvPreviewBox').textContent = csvRow;
+
+      // Generate Clean JSON
+      document.getElementById('jsonPreviewBox').textContent = JSON.stringify({
+        arm: simState.arm,
+        currentStep: simState.currentStep,
+        s1b: simState.s1b,
+        s2a: simState.s2a,
+        s2b: simState.s2b,
+        s4: simState.s4,
+        metrics: { finalPoints, finalPayout, bonusUnlocked, integrityCredit }
+      }, null, 2);
+    }
+
+    function copyCsvRow() {
+      navigator.clipboard.writeText(document.getElementById('csvPreviewBox').textContent);
+      alert("52-Column CSV Telemetry Row copied to clipboard!");
+    }
+
+    function copyJsonState() {
+      navigator.clipboard.writeText(document.getElementById('jsonPreviewBox').textContent);
+      alert("JSON Session State copied to clipboard!");
+    }
+
+    window.onload = initSimulator;
+  </script>
+</body>
+</html>

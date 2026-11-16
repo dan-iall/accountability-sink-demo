@@ -1,0 +1,2 @@
+# HITL Accountability Simulator MVP2 - Test Suite Dependencies
+beautifulsoup4>=4.12.0

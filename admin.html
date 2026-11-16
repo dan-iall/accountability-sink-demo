@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>HITL Accountability Study — Experimenter Control Room (Prototype)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/enterprise_slate.css">
+  <style>
+    /* Specific admin micro-utilities */
+    .tab-active {
+      border-color: #3070B3;
+      color: #3070B3;
+      background-color: #EFF6FF;
+    }
+  </style>
+</head>
+<body class="bg-[#F1F5F9] text-[#0F172A] font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Reviewer Access Gate Modal (#reviewerAccessGate) - Fail Closed by default -->
+  <div id="reviewerAccessGate" class="fixed inset-0 z-[99999] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-8 space-y-6 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-blue-700 mx-auto">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <div class="space-y-2">
+        <span class="px-2.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider font-bold bg-slate-100 text-slate-700 border border-slate-200">
+          PROTOTYPE RESEARCH DEMO // Reviewer Gate
+        </span>
+        <h2 class="text-xl font-bold text-slate-900 tracking-tight">
+          Authorized Access Required
+        </h2>
+        <p class="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+          PROTOTYPE RESEARCH DEMO — Danial Bahrambeygi (Independent Mockup; Not Affiliated with TUM).<br>
+          Operations Management &amp; HITL Accountability Simulator.<br>
+          <span class="text-slate-800 font-medium">Access restricted to authorized reviewers. Please use the direct link provided in your invitation.</span>
+        </p>
+      </div>
+      <form id="formReviewerAuth" onsubmit="handleReviewerAuthSubmit(event)" class="space-y-3 pt-2">
+        <div class="flex gap-2">
+          <input id="inputGateToken" type="password" placeholder="Enter Access Code (e.g. demo2026)" class="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors">
+            Unlock
+          </button>
+        </div>
+        <div id="gateErrorMsg" class="hidden text-[11px] text-rose-600 font-mono">
+          Invalid access code. Please check your invitation.
+        </div>
+      </form>
+      <div class="pt-4 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
+        Independent Doctoral Application Prototype &bull; Danial Bahrambeygi (2026)
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       0.1 Header & Academic Identity (#adminHeader)
+       ====================================================================== -->
+  <header id="adminHeader" class="h-12 w-full flex items-center justify-between px-6 sticky top-0 z-50 bg-[#0B1120] border-b border-[#3070B3] text-[#F8FAFC]">
+    <!-- Left: TUM Institutional Identity -->
+    <div class="flex items-center space-x-3">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border border-[#3070B3] bg-[rgba(0,102,204,0.12)] text-[#93C5FD]">
+        🔬 HITL ACCOUNTABILITY PROTOTYPE // CONTROL ROOM
+      </span>
+      <h1 class="text-sm font-semibold tracking-wide text-slate-100 hidden sm:inline-block">
+        Unit 4 Experimenter Control Room <span class="text-slate-400 font-mono text-xs">(v2.4)</span>
+      </h1>
+    </div>
+
+    <!-- Right: Live Global Cohort Telemetry -->
+    <div class="flex items-center space-x-4">
+      <span class="font-mono text-xs text-[#94A3B8]">
+        Target Cohort: <span class="text-slate-200 font-semibold" id="lblTargetCohortN">N = 240</span>
+      </span>
+      <span class="font-mono text-xs font-semibold text-[#38BDF8]" id="lblCohortEnrolled">
+        Enrolled: 0 / 240
+      </span>
+      <span class="font-mono text-xs font-semibold text-[#34D399]" id="lblCohortCompleted">
+        Completed: 0
+      </span>
+      <button id="btnClearVault" type="button" class="px-2.5 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/80 rounded text-xs font-mono transition-colors">
+        ⚠️ Clear Vault Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================================
+       Main Workspace
+       ====================================================================== -->
+  <main class="w-full max-w-[1520px] mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1">
+
+    <!-- Skew Warning Alert (#bannerCohortSkew) -->
+    <div id="bannerCohortSkew" class="hidden rounded-lg border border-amber-300 bg-amber-50 p-4 shadow-sm" role="alert">
+      <div class="flex items-center space-x-3">
+        <span class="text-xl">⚠️</span>
+        <div>
+          <h3 class="text-sm font-semibold text-amber-900">Cohort Skew Warning</h3>
+          <p id="txtCohortSkewMsg" class="text-xs text-amber-800 mt-0.5">
+            Cohort skew detected across treatment conditions. Use Balanced Randomization to equalize groups.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         0.2 Live 4-Arm Allocation Balancer (#armBalancerCard)
+         ====================================================================== -->
+    <section id="armBalancerCard" class="enterprise-card p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-2">
+        <div>
+          <h2 class="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+            <span>⚖️</span> Live 4-Arm Allocation Balancer
+          </h2>
+          <p class="text-xs text-[#475569] mt-0.5">
+            Real-time between-subjects allocation balancing target (N₁ ≈ N₂ ≈ N₃ ≈ N₄ = 60). Identifies least-populated target condition.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-[#94A3B8] font-mono">Allocation Engine: Deterministic Greedy Min-Draw</span>
+        </div>
+      </div>
+
+      <!-- 4-Card Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+        <!-- Arm 1 -->
+        <div id="cardArm1" class="border border-[#E2E8F0] rounded-lg p-4 bg-white relative transition-all duration-200">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Arm 1 (Control)</span>
+            <span id="targetBadgeArm1" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Target
+            </span>
+          </div>
+          <div class="text-2xl font-bold font-mono text-[#0F172A]" id="cntArm1">N₁ = 0 / 60</div>
+          <div class="mt-2">
+            <span class="inline-block text-[11px] font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+              Standard Corporate Baseline
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+            25.0s SLA, binary AI badge, standard administrative settlement log.
+          </p>
+        </div>
+
+        <!-- Arm 2 -->
+        <div id="cardArm2" class="border border-[#E2E8F0] rounded-lg p-4 bg-white relative transition-all duration-200">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Arm 2 (STAMP)</span>
+            <span id="targetBadgeArm2" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Target
+            </span>
+          </div>
+          <div class="text-2xl font-bold font-mono text-[#0F172A]" id="cntArm2">N₂ = 0 / 60</div>
+          <div class="mt-2">
+            <span class="inline-block text-[11px] font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">
+              Ergonomic Deficit Diagnostic
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+            25.0s SLA, REFA 48.5s baseline contrast (-23.5s deficit displayed on Screen 3; skips Screen 1B).
+          </p>
+        </div>
+
+        <!-- Arm 3 -->
+        <div id="cardArm3" class="border border-[#E2E8F0] rounded-lg p-4 bg-white relative transition-all duration-200">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Arm 3 (Embodied)</span>
+            <span id="targetBadgeArm3" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Target
+            </span>
+          </div>
+          <div class="text-2xl font-bold font-mono text-[#0F172A]" id="cntArm3">N₃ = 0 / 60</div>
+          <div class="mt-2">
+            <span class="inline-block text-[11px] font-medium bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">
+              2-Case Sensorimotor Rotation
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+            Screen 1B rotation (Case #089 untimed + Case #094 25.0s), personal benchmark recall card on Screen 3.
+          </p>
+        </div>
+
+        <!-- Arm 4 -->
+        <div id="cardArm4" class="border border-[#E2E8F0] rounded-lg p-4 bg-white relative transition-all duration-200">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Arm 4 (EU AI Act)</span>
+            <span id="targetBadgeArm4" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Target
+            </span>
+          </div>
+          <div class="text-2xl font-bold font-mono text-[#0F172A]" id="cntArm4">N₄ = 0 / 60</div>
+          <div class="mt-2">
+            <span class="inline-block text-[11px] font-medium bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">
+              Arts. 14, 26 &amp; 99(4)(e) Shield
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+            Regulatory timer audit reveal on Screen 5; hidden +€1.00 Integrity Credit.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-Column Grid: Enrollment Wizard & Config Engine -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- ======================================================================
+           0.3 Participant Enrollment Wizard (#enrollmentWizardCard)
+           ====================================================================== -->
+      <section id="enrollmentWizardCard" class="enterprise-card p-6 lg:col-span-7 flex flex-col justify-between">
+        <div>
+          <div class="pb-3 border-b border-[#E2E8F0]">
+            <h2 class="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+              <span>🪄</span> Participant Enrollment Wizard
+            </h2>
+            <p class="text-xs text-[#475569] mt-0.5">
+              Generates blinded, verified participant session URLs with dynamic active configuration parameters.
+            </p>
+          </div>
+
+          <div class="mt-4 space-y-4">
+            <!-- 1. Participant ID -->
+            <div>
+              <label for="inputPid" class="block text-xs font-semibold text-[#0F172A] mb-1">
+                Participant Identifier (PID) <span class="text-red-500">*</span>
+              </label>
+              <div class="flex space-x-2">
+                <input type="text" id="inputPid" placeholder="e.g. P_9824 or Prolific PID"
+                  class="flex-1 px-3 py-2 border border-[#CBD5E1] rounded-md font-mono text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <button type="button" id="btnAutoPid" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-md text-xs font-semibold transition-colors flex items-center gap-1">
+                  🎲 Auto-Generate ID
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Treatment Arm Selection (#armSelectionGroup) -->
+            <div>
+              <label class="block text-xs font-semibold text-[#0F172A] mb-1">
+                Experimental Condition Assignment
+              </label>
+              <div id="armSelectionGroup" class="space-y-2 border border-[#E2E8F0] p-3 rounded-md bg-[#F8FAFC]">
+                <label class="flex items-center space-x-2 text-xs font-medium text-slate-800 cursor-pointer">
+                  <input type="radio" name="armSelect" id="radioArmAuto" value="auto" checked class="text-blue-600 focus:ring-blue-500">
+                  <span class="font-semibold text-blue-700">🎲 Balanced Randomization</span>
+                  <span class="text-slate-500">(Auto-selects least populated arm) — Recommended</span>
+                </label>
+                <div class="border-t border-slate-200 my-1 pt-1 space-y-1.5">
+                  <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                    <input type="radio" name="armSelect" id="radioArm1" value="1" class="text-blue-600 focus:ring-blue-500">
+                    <span><strong>Arm 1:</strong> Control (Standard Administrative Log)</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                    <input type="radio" name="armSelect" id="radioArm2" value="2" class="text-blue-600 focus:ring-blue-500">
+                    <span><strong>Arm 2:</strong> STAMP Telemetry (Cognitive Ergonomics Deficit)</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                    <input type="radio" name="armSelect" id="radioArm3" value="3" class="text-blue-600 focus:ring-blue-500">
+                    <span><strong>Arm 3:</strong> Embodied Friction (Day-1 Floor Rotation)</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                    <input type="radio" name="armSelect" id="radioArm4" value="4" class="text-blue-600 focus:ring-blue-500">
+                    <span><strong>Arm 4:</strong> EU AI Act (Statutory Liability Shift)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Station Metadata / Notes -->
+            <div>
+              <label for="inputMetadata" class="block text-xs font-semibold text-[#0F172A] mb-1">
+                Station Metadata / Session Notes <span class="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input type="text" id="inputMetadata" placeholder="e.g. Tobii Station A - Lab Room 204 or Prolific Wave 1"
+                class="w-full px-3 py-2 border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            </div>
+
+            <!-- 4. Simulation Clock Speed (#speedToggle) -->
+            <div>
+              <label class="block text-xs font-semibold text-[#0F172A] mb-1">
+                Simulation Clock Multiplier
+              </label>
+              <div id="speedToggle" class="flex space-x-4 bg-slate-50 p-2.5 rounded-md border border-[#E2E8F0]">
+                <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+                  <input type="radio" name="speedSelect" value="1" checked class="text-blue-600 focus:ring-blue-500">
+                  <span class="font-medium">1x Standard Speed</span>
+                  <span class="text-slate-400">(Authentic Participant Experience)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+                  <input type="radio" name="speedSelect" value="3" class="text-blue-600 focus:ring-blue-500">
+                  <span class="font-medium text-amber-700">3x Accelerated Speed</span>
+                  <span class="text-slate-400">(Researcher Dry Run / Smoke Test)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Generate Link CTA -->
+        <div class="mt-6 pt-4 border-t border-[#E2E8F0]">
+          <button type="button" id="btnGenerateLink" class="w-full py-3 px-6 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-sm shadow-sm transition-colors flex items-center justify-center gap-2">
+            <span>⚡</span> GENERATE BLINDED PARTICIPANT LINK ➔
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           0.6 JSON Experiment Configuration Engine (#configEngineCard)
+           ====================================================================== -->
+      <section id="configEngineCard" class="enterprise-card p-6 lg:col-span-5 flex flex-col justify-between">
+        <div>
+          <div class="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+                <span>⚙️</span> JSON Config Engine
+              </h2>
+              <p class="text-xs text-[#475569] mt-0.5">
+                Dynamic parameter binding without modifying source code.
+              </p>
+            </div>
+            <button type="button" id="btnResetConfig" class="text-xs text-slate-600 hover:text-red-700 underline transition-colors">
+              Reset Baseline Defaults
+            </button>
+          </div>
+
+          <!-- Active Profile Badge -->
+          <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-md">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-700">Active Profile Status:</span>
+              <span id="activeConfigBadge" class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                Default Baseline Protocol (v2.4.0-mvp2-locked)
+              </span>
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-mono">
+              <div id="cfgSummarySla">SLA Tiers: 25s / 38s / 60s</div>
+              <div id="cfgSummaryShiftDuration">Shift Duration: 25s</div>
+              <div id="cfgSummaryHurdle">Hurdle: 1,200 pts</div>
+              <div id="cfgSummaryTargetN">Target N: 240 (60/arm)</div>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div class="mt-4">
+            <label class="block text-xs font-semibold text-[#0F172A] mb-1">
+              Import Custom JSON Configuration
+            </label>
+            <div id="dropZoneConfig" class="border-2 border-dashed border-slate-300 hover:border-blue-400 bg-slate-50 hover:bg-blue-50/30 rounded-lg p-5 text-center cursor-pointer transition-colors">
+              <input type="file" id="inputFileConfig" accept=".json" class="hidden">
+              <div class="space-y-1">
+                <span class="text-2xl">📥</span>
+                <p class="text-xs font-semibold text-slate-700">
+                  Drop updated <code class="font-mono text-blue-600">tum_experiment_config.json</code> here
+                </p>
+                <p class="text-[11px] text-slate-400">or click to browse local filesystem</p>
+              </div>
+            </div>
+            <div id="configErrorBanner" class="hidden mt-2 p-2.5 rounded bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+          </div>
+        </div>
+
+        <!-- Download Template CTA -->
+        <div class="mt-6 pt-4 border-t border-[#E2E8F0]">
+          <button type="button" id="btnDownloadConfig" class="w-full py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-2">
+            <span>⬇️</span> Download Canonical Config Template (JSON)
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ======================================================================
+         0.4 Blinded Subject Handover Link Card (#generatedLinkCard)
+         ====================================================================== -->
+    <section id="generatedLinkCard" class="hidden enterprise-card p-6 border-l-4 border-l-[#059669]">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-600 text-lg">✓</span>
+          <h2 class="text-base font-bold text-[#0F172A]">Blinded Participant Session Link Generated</h2>
+        </div>
+        <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold" id="lblGeneratedArmBadge">
+          Arm Assigned
+        </span>
+      </div>
+
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">
+            Handover URL (Complete Double-Blind Parameter Quarantine):
+          </label>
+          <div id="txtGeneratedUrl" class="bg-[#F8FAFC] border border-[#CBD5E1] p-3 rounded font-mono text-xs text-[#0F172A] select-all break-all shadow-inner">
+            index.html?pid=...
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" id="btnCopyUrl" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>📋</span> Copy Link to Clipboard
+          </button>
+          <button type="button" id="btnCopyBlindedTokenUrl" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>🔒</span> Copy Blinded Token Link (Base64)
+          </button>
+          <a id="btnLaunchSession" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>🚀</span> Launch Blinded Participant Session
+          </a>
+        </div>
+
+        <!-- Pilot & Reviewer Cockpit Mode Advisory Callout Banner -->
+        <div id="bannerPilotCockpitMode" class="mt-4 p-3.5 bg-blue-50/80 border border-blue-200 rounded-md text-xs text-blue-950 flex items-start gap-2.5">
+          <span class="text-base leading-none text-blue-600 mt-0.5">ℹ️</span>
+          <div class="space-y-1">
+            <div class="font-bold text-blue-900">Pilot &amp; Reviewer Cockpit Mode Active:</div>
+            <p class="text-blue-800 leading-relaxed">
+              Explicit parameters (<code class="font-mono bg-blue-100/70 text-blue-900 px-1 py-0.5 rounded">&amp;arm=</code>, <code class="font-mono bg-blue-100/70 text-blue-900 px-1 py-0.5 rounded">&amp;speed=</code>, <code class="font-mono bg-blue-100/70 text-blue-900 px-1 py-0.5 rounded">&amp;sla1=</code>) are intentionally surfaced in this testing cockpit for researcher inspection, professor review, and deterministic replication. For live laboratory trials and Prolific rollout, parameters are quarantined via Base64 tokenization (<code class="font-mono bg-blue-100/70 text-blue-900 px-1 py-0.5 rounded">?token=...</code>) and address-bar scrubbing to guarantee 100% double-blind experimental isolation.
+            </p>
+          </div>
+        </div>
+
+        <!-- Double-Blind Hygiene Checklist -->
+        <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded text-xs space-y-1 text-slate-600">
+          <div class="font-semibold text-slate-700 mb-1">Double-Blind Hygiene Checklist (Researcher Advisory):</div>
+          <div class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Subject URL is completely stripped of researcher controls and hypothesis indicators.</div>
+          <div class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Do not mention treatment arm differences or the post-fraud scapegoating choice to the participant.</div>
+          <div class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Verify browser window is expanded to minimum 1280px width for Tobii Pro eye-tracking.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         0.5 Centralized Session Vault Table & Telemetry Exports (#sessionVaultCard)
+         ====================================================================== -->
+    <section id="sessionVaultCard" class="enterprise-card p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-3">
+        <div>
+          <h2 class="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+            <span>🗄️</span> Centralized Session Vault
+          </h2>
+          <p class="text-xs text-[#475569] mt-0.5">
+            Single source of truth reading <code class="font-mono text-slate-700">localStorage['tum_study_sessions']</code>. Immutable config snapshots embedded per session.
+          </p>
+        </div>
+
+        <!-- One-Click Export & Action Tools -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnExportCsv" class="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>📊</span> Export Analysis Dataset (CSV)
+          </button>
+          <button type="button" id="btnExportJson" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>⬇️</span> Export Full Telemetry (JSON)
+          </button>
+          <button type="button" id="btnRefreshVault" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>🔄</span> Refresh Table
+          </button>
+        </div>
+      </div>
+
+      <!-- Configurable Synthetic Cohort Intake Bar -->
+      <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Intake Count & Presets -->
+          <div class="flex items-center gap-1.5">
+            <label for="inputSeedCount" class="text-xs font-bold text-slate-700 whitespace-nowrap">Cohort N:</label>
+            <input type="number" id="inputSeedCount" min="1" max="1000" value="240"
+                   class="w-20 px-2 py-1 text-xs font-mono border border-slate-300 rounded bg-white text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-hidden">
+            <div class="inline-flex rounded-md shadow-2xs text-[11px] font-mono">
+              <button type="button" id="btnPresetSeed8" class="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded-l text-slate-700 transition-colors">8</button>
+              <button type="button" id="btnPresetSeed24" class="px-2 py-1 bg-white hover:bg-slate-100 border-t border-b border-r border-slate-300 text-slate-700 transition-colors">24</button>
+              <button type="button" id="btnPresetSeed60" class="px-2 py-1 bg-white hover:bg-slate-100 border-t border-b border-r border-slate-300 text-slate-700 transition-colors">60</button>
+              <button type="button" id="btnPresetCohortN" class="px-2 py-1 bg-white hover:bg-slate-100 border-t border-b border-r border-slate-300 rounded-r text-slate-700 transition-colors" title="Target Cohort N from active config">Cohort N</button>
+            </div>
+          </div>
+
+          <!-- Mode Selector -->
+          <div class="flex items-center gap-1.5">
+            <label for="selectSeedMode" class="text-xs font-bold text-slate-700 whitespace-nowrap">Mode:</label>
+            <select id="selectSeedMode" class="px-2 py-1 text-xs font-medium border border-slate-300 rounded bg-white text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-hidden">
+              <option value="replace">Replace Vault</option>
+              <option value="append">Append to Existing</option>
+            </select>
+          </div>
+
+          <!-- Deterministic PRNG Seed -->
+          <div class="flex items-center gap-1.5">
+            <label for="inputSeedPrng" class="text-xs font-bold text-slate-700 whitespace-nowrap" title="Mulberry32 PRNG seed for deterministic replication">PRNG Seed:</label>
+            <input type="number" id="inputSeedPrng" placeholder="Random (e.g. 42)"
+                   class="w-32 px-2 py-1 text-xs font-mono border border-slate-300 rounded bg-white text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-hidden">
+          </div>
+        </div>
+
+        <!-- Seeder Trigger Button -->
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnSeedDummyData" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+            <span>🧪</span> Generate Synthetic Cohort
+          </button>
+        </div>
+      </div>
+      </div>
+
+      <!-- Live Session Table (#tblSessionVault) -->
+      <div class="mt-4 overflow-x-auto border border-[#E2E8F0] rounded-lg">
+        <table id="tblSessionVault" class="min-w-full divide-y divide-[#E2E8F0] text-left text-xs">
+          <thead class="bg-[#F8FAFC] text-slate-700 font-semibold">
+            <tr>
+              <th scope="col" class="px-3 py-3">PID</th>
+              <th scope="col" class="px-3 py-3">Timestamp</th>
+              <th scope="col" class="px-3 py-3">Arm</th>
+              <th scope="col" class="px-3 py-3">Baseline Dwell</th>
+              <th scope="col" class="px-3 py-3">Shift 2 Directive</th>
+              <th scope="col" class="px-3 py-3">Screen 4 Choice</th>
+              <th scope="col" class="px-3 py-3">Sara Share</th>
+              <th scope="col" class="px-3 py-3">Score / Payout</th>
+              <th scope="col" class="px-3 py-3 text-right">Status / Action</th>
+            </tr>
+          </thead>
+          <tbody id="tblSessionVaultBody" class="divide-y divide-[#E2E8F0] bg-white font-mono text-[11px]">
+            <!-- Rendered via JS -->
+            <tr>
+              <td colspan="9" class="px-4 py-8 text-center text-slate-400 font-sans italic">
+                No sessions registered yet in local vault. Generate links or click "Seed 8 Dummy Sessions" to test.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         0.7 DataPipe Telemetry Gateway (#dataPipeCard)
+         ====================================================================== -->
+    <section id="dataPipeCard" class="enterprise-card p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#E2E8F0] gap-2">
+        <div>
+          <h2 class="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+            <span>🌐</span> DataPipe Telemetry Gateway
+          </h2>
+          <p class="text-xs text-[#475569] mt-0.5">
+            Remote ingestion pipeline: <code class="font-mono text-slate-700">https://pipe.jspsych.org/api/data/</code> (Experiment ID: <code class="font-mono text-blue-600 font-semibold">30e5A1M4ut54</code>).
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="statusDatapipe" class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+            🟢 DataPipe Gateway: Standby / Ready
+          </span>
+          <button type="button" id="btnTestDatapipe" class="px-3 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs">
+            <span>⚡</span> Test Connection Ping
+          </button>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-slate-500 leading-relaxed">
+        <strong>Fail-Safe Protocol:</strong> In case of intermittent WiFi or offline lab operation, participant telemetry is guaranteed to serialize synchronously to local browser vault first. Remote ingestion errors fail non-fatally without interrupting experimental flow.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================================
+       Executive Modals
+       ====================================================================== -->
+
+  <!-- Modal: Clear Vault Double Confirmation -->
+  <div id="modalClearVaultConfirm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-safe">
+    <div class="bg-white rounded-lg border border-red-200 shadow-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center space-x-3 text-red-600">
+        <span class="text-2xl">⚠️</span>
+        <h3 class="text-base font-bold text-slate-900">Confirm Complete Vault Purge</h3>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Are you certain you want to delete <strong>ALL participant sessions</strong> from <code class="font-mono text-slate-800">localStorage['tum_study_sessions']</code>? This action cannot be undone and will permanently wipe local lab telemetry.
+      </p>
+      <div class="flex justify-end space-x-3 pt-2">
+        <button type="button" id="btnCancelClearVault" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-colors">
+          Cancel
+        </button>
+        <button type="button" id="btnConfirmClearVault" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md transition-colors shadow-xs">
+          Yes, Wipe Vault Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete Single Row Confirmation -->
+  <div id="modalDeleteRowConfirm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-safe">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-xl max-w-sm w-full p-6 space-y-4">
+      <h3 class="text-sm font-bold text-slate-900">Delete Participant Record</h3>
+      <p class="text-xs text-slate-600" id="txtDeleteRowMsg">
+        Remove this session from the local vault?
+      </p>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" id="btnCancelDeleteRow" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded transition-colors">
+          Cancel
+        </button>
+        <button type="button" id="btnConfirmDeleteRow" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded transition-colors shadow-xs">
+          Delete Row
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Config Diff Viewer Modal (#modalConfigDiff) -->
+  <div id="modalConfigDiff" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-safe">
+    <div class="bg-white rounded-lg border border-slate-300 shadow-2xl max-w-3xl w-full p-6 flex flex-col max-h-[85vh]">
+      <div class="pb-3 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg">🔍</span>
+          <h3 class="text-base font-bold text-slate-900">Configuration Diff Inspector</h3>
+        </div>
+        <span class="text-xs font-mono text-slate-500">Schema Validation: Passed ✓</span>
+      </div>
+
+      <div class="py-3 text-xs text-slate-600">
+        Review differences between the current baseline configuration and the uploaded profile. Changed parameters are highlighted in emerald.
+      </div>
+
+      <div class="flex-1 overflow-y-auto border border-slate-200 rounded-lg">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-xs font-mono">
+          <thead class="bg-slate-50 text-slate-700 font-semibold sticky top-0">
+            <tr>
+              <th scope="col" class="px-4 py-2.5">Parameter Key</th>
+              <th scope="col" class="px-4 py-2.5">Current / Baseline</th>
+              <th scope="col" class="px-4 py-2.5">Imported Value</th>
+            </tr>
+          </thead>
+          <tbody id="tblConfigDiffBody" class="divide-y divide-slate-200 bg-white">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 mt-4 flex items-center justify-between">
+        <span id="txtDiffSummary" class="text-xs text-slate-600 font-medium">0 parameters modified</span>
+        <div class="flex space-x-3">
+          <button type="button" id="btnCancelConfigDiff" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-colors">
+            Cancel
+          </button>
+          <button type="button" id="btnConfirmConfigDiff" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md transition-colors shadow-xs">
+            ✓ Confirm &amp; Apply Active Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       0.8 Client-Side Logic Engine
+       ====================================================================== -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ----------------------------------------------------------------------
+      // 1. CANONICAL DEFAULT EXPERIMENT CONFIG (Section 10.2)
+      // ----------------------------------------------------------------------
+      const DEFAULT_EXPERIMENT_CONFIG = {
+        "configVersion": "2.4.0-mvp2-locked",
+        "updatedAtIso": "2026-11-01T00:00:00.000Z",
+        "targetCohortN": 240,
+        "pointsPerCase": 10,
+        "bonusTargetPts": 1200,
+        "basePayEur": 2.50,
+        "performanceBonusEur": 4.00,
+        "arm4IntegrityCreditEur": 1.00,
+        "tier1SlaSec": 25.0,
+        "tier2SlaSec": 38.0,
+        "tier3SlaSec": 60.0,
+        "refaBaselineSec": 48.5,
+        "ergonomicComplianceThresholdSec": 48.0,
+        "shiftDurationSimSec": 25.0,
+        "shift1TargetCases": 36,
+        "shift2DirectiveACases": 36,
+        "shift2DirectiveBCases": 32,
+        "shift2DirectiveBPenaltyPts": -40,
+        "shift3PreCrashCases": 27,
+        "case312SaraDecisionSec": 13.4,
+        "provisionalHoldPts": -300,
+        "arms1To3PenalizeHoldReleasePts": 300,
+        "arms1To3AbsorbHoldReleasePts": 0,
+        "arm4PenalizeRetaliationFinePts": -50,
+        "arm4AbsorbIntegrityCreditPts": 100,
+        "shift4SafeCases": 25,
+        "shift4SafeCatchBonusPts": 50,
+        "shift4FastCases": 26,
+        "minJustificationChars": 50,
+        "gpuOutboundWeightKg": 4.92,
+        "case312InboundWeightKg": 0.24,
+        "case312EscrowValueEur": 4850.00,
+        "case089EscrowValueEur": 3600.00,
+        "case094EscrowValueEur": 4200.00,
+        "case409EscrowValueEur": 5200.00,
+        "case409InboundWeightKg": 0.31,
+        "datapipeExperimentId": "30e5A1M4ut54"
+      };
+
+      // ----------------------------------------------------------------------
+      // 2. STATE STORAGE HELPERS
+      // ----------------------------------------------------------------------
+      const SESSIONS_KEY = 'tum_study_sessions';
+      const CONFIG_KEY = 'tum_study_config';
+
+      function getSessions() {
+        try {
+          const raw = localStorage.getItem(SESSIONS_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          console.error('Error reading localStorage sessions:', e);
+          return [];
+        }
+      }
+
+      function saveSessions(sessions) {
+        try {
+          localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+        } catch (e) {
+          console.error('Error saving localStorage sessions:', e);
+        }
+      }
+
+      function getActiveConfig() {
+        try {
+          const raw = localStorage.getItem(CONFIG_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return Object.assign({}, DEFAULT_EXPERIMENT_CONFIG, parsed);
+          }
+        } catch (e) {
+          console.warn('Error reading custom config, falling back to default:', e);
+        }
+        return Object.assign({}, DEFAULT_EXPERIMENT_CONFIG);
+      }
+
+      function isCustomConfigActive() {
+        return !!localStorage.getItem(CONFIG_KEY);
+      }
+
+      // Pending config for diff modal
+      let pendingImportedConfig = null;
+      let sessionToDeleteIndex = null;
+
+      // ----------------------------------------------------------------------
+      // 3. BALANCING ALGORITHM (Section 0.2)
+      // ----------------------------------------------------------------------
+      function calculateArmCounts(sessions) {
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        sessions.forEach(s => {
+          const arm = parseInt(s.arm, 10);
+          if ([1, 2, 3, 4].includes(arm)) {
+            counts[arm]++;
+          }
+        });
+        return counts;
+      }
+
+      function getNextBalancedArm(counts) {
+        const minVal = Math.min(counts[1], counts[2], counts[3], counts[4]);
+        const candidateArms = [1, 2, 3, 4].filter(arm => counts[arm] === minVal);
+        // Uniform random break among ties
+        const randomIndex = Math.floor(Math.random() * candidateArms.length);
+        return candidateArms[randomIndex];
+      }
+
+      function updateBalancerUI() {
+        const cfg = getActiveConfig();
+        const targetCohortN = (cfg && typeof cfg.targetCohortN === 'number') ? cfg.targetCohortN : 240;
+        const armTargetN = Math.round(targetCohortN / 4);
+
+        const sessions = getSessions();
+        const counts = calculateArmCounts(sessions);
+        const enrolled = sessions.length;
+        const completed = sessions.filter(s => s.status === 'COMPLETED').length;
+
+        // Update header telemetry counters
+        const lblTargetCohortN = document.getElementById('lblTargetCohortN');
+        if (lblTargetCohortN) {
+          lblTargetCohortN.textContent = `N = ${targetCohortN}`;
+        }
+        document.getElementById('lblCohortEnrolled').textContent = `Enrolled: ${enrolled} / ${targetCohortN}`;
+        document.getElementById('lblCohortCompleted').textContent = `Completed: ${completed}`;
+
+        // Update arm counts
+        document.getElementById('cntArm1').textContent = `N₁ = ${counts[1]} / ${armTargetN}`;
+        document.getElementById('cntArm2').textContent = `N₂ = ${counts[2]} / ${armTargetN}`;
+        document.getElementById('cntArm3').textContent = `N₃ = ${counts[3]} / ${armTargetN}`;
+        document.getElementById('cntArm4').textContent = `N₄ = ${counts[4]} / ${armTargetN}`;
+
+        // Least populated arm highlight
+        const minVal = Math.min(counts[1], counts[2], counts[3], counts[4]);
+        [1, 2, 3, 4].forEach(arm => {
+          const card = document.getElementById(`cardArm${arm}`);
+          const badge = document.getElementById(`targetBadgeArm${arm}`);
+          if (counts[arm] === minVal) {
+            card.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-200');
+            badge.classList.remove('hidden');
+            badge.textContent = '🟢 Next Target';
+          } else {
+            card.classList.remove('border-emerald-500', 'ring-2', 'ring-emerald-200');
+            badge.classList.add('hidden');
+          }
+        });
+
+        // Cohort skew banner: max - min > 2
+        const maxVal = Math.max(counts[1], counts[2], counts[3], counts[4]);
+        const skewBanner = document.getElementById('bannerCohortSkew');
+        if (maxVal - minVal > 2) {
+          const leaderArm = [1, 2, 3, 4].find(a => counts[a] === maxVal);
+          const laggerArm = [1, 2, 3, 4].find(a => counts[a] === minVal);
+          const diff = maxVal - minVal;
+          document.getElementById('txtCohortSkewMsg').textContent =
+            `⚠️ Cohort Skew Detected: Arm ${leaderArm} leads Arm ${laggerArm} by ${diff} participants (${counts[leaderArm]} vs ${counts[laggerArm]}). Use Balanced Randomization to equalize groups.`;
+          skewBanner.classList.remove('hidden');
+        } else {
+          skewBanner.classList.add('hidden');
+        }
+      }
+
+      // ----------------------------------------------------------------------
+      // 4. PARTICIPANT ENROLLMENT WIZARD (#enrollmentWizardCard)
+      // ----------------------------------------------------------------------
+      function generateHexPid() {
+        const hex = Math.floor(0x1000 + Math.random() * 0x9000).toString(16).toUpperCase();
+        return `P_${hex}`;
+      }
+
+      document.getElementById('btnAutoPid').addEventListener('click', () => {
+        document.getElementById('inputPid').value = generateHexPid();
+      });
+
+      document.getElementById('btnGenerateLink').addEventListener('click', () => {
+        let pid = document.getElementById('inputPid').value.trim();
+        if (!pid) {
+          pid = generateHexPid();
+          document.getElementById('inputPid').value = pid;
+        }
+
+        const selectedArmRadio = document.querySelector('input[name="armSelect"]:checked');
+        let armChoice = selectedArmRadio ? selectedArmRadio.value : 'auto';
+
+        let targetArm = 1;
+        if (armChoice === 'auto') {
+          const sessions = getSessions();
+          const counts = calculateArmCounts(sessions);
+          targetArm = getNextBalancedArm(counts);
+        } else {
+          targetArm = parseInt(armChoice, 10);
+        }
+
+        const speedRadio = document.querySelector('input[name="speedSelect"]:checked');
+        const speedMultiplier = speedRadio ? speedRadio.value : '1';
+        const metadata = document.getElementById('inputMetadata').value.trim();
+
+        const activeCfg = getActiveConfig();
+
+        // Build URL query with SLA and target parameters for deterministic replication
+        const params = new URLSearchParams();
+        params.set('access', 'tum2026');
+        params.set('pid', pid);
+        params.set('arm', targetArm.toString());
+        params.set('speed', speedMultiplier);
+        params.set('sla1', activeCfg.tier1SlaSec.toString());
+        params.set('sla2', activeCfg.tier2SlaSec.toString());
+        params.set('sla3', activeCfg.tier3SlaSec.toString());
+        params.set('target', activeCfg.bonusTargetPts.toString());
+        params.set('dur', activeCfg.shiftDurationSimSec.toString());
+
+        if (metadata) {
+          params.set('meta', metadata);
+        }
+
+        // 1. Construct explicit link for researcher review & deterministic replication
+        const fullUrl = `${window.location.origin}${window.location.pathname.replace(/admin\.html$/, '')}index.html?${params.toString()}`;
+
+        // 2. Construct quarantined Base64 token carrying the entire 37-parameter config payload
+        const payload = {
+          pid: pid,
+          arm: targetArm,
+          speed: parseInt(speedMultiplier, 10) || 1,
+          meta: metadata || '',
+          config: activeCfg
+        };
+        const token = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        const tokenParams = new URLSearchParams();
+        tokenParams.set('access', 'tum2026');
+        tokenParams.set('token', token);
+        const blindedUrl = `${window.location.origin}${window.location.pathname.replace(/admin\.html$/, '')}index.html?${tokenParams.toString()}`;
+
+        // Render in handover card
+        const card = document.getElementById('generatedLinkCard');
+        const txtUrl = document.getElementById('txtGeneratedUrl');
+        const launchBtn = document.getElementById('btnLaunchSession');
+        const armBadge = document.getElementById('lblGeneratedArmBadge');
+
+        // Store blinded token URL on card and button dataset for resilient retrieval
+        card.dataset.blindedUrl = blindedUrl;
+        const btnCopyBlinded = document.getElementById('btnCopyBlindedTokenUrl');
+        if (btnCopyBlinded) {
+          btnCopyBlinded.dataset.url = blindedUrl;
+        }
+
+        // Preserve explicit URL in display box and launch button for researcher inspection
+        txtUrl.textContent = fullUrl;
+        launchBtn.setAttribute('href', fullUrl);
+        armBadge.textContent = `Assigned: Arm ${targetArm} (${targetArm === 1 ? 'Control' : targetArm === 2 ? 'STAMP' : targetArm === 3 ? 'Embodied' : 'EU AI Act'}) [${speedMultiplier}x]`;
+
+        card.classList.remove('hidden');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      // Copy Link CTA
+      document.getElementById('btnCopyUrl').addEventListener('click', async () => {
+        const text = document.getElementById('txtGeneratedUrl').textContent.trim();
+        const btn = document.getElementById('btnCopyUrl');
+        try {
+          await navigator.clipboard.writeText(text);
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<span>✓</span> Copied to Clipboard!';
+          btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+          btn.classList.add('bg-slate-800');
+          setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.classList.remove('bg-slate-800');
+            btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+          }, 2500);
+        } catch (err) {
+          console.error('Failed to copy link: ', err);
+        }
+      });
+
+      // Copy Blinded Token Link (Base64) CTA
+      document.getElementById('btnCopyBlindedTokenUrl').addEventListener('click', async () => {
+        const card = document.getElementById('generatedLinkCard');
+        const btn = document.getElementById('btnCopyBlindedTokenUrl');
+        const tokenUrl = (btn && btn.dataset.url) || (card && card.dataset.blindedUrl) || '';
+        if (!tokenUrl) return;
+        try {
+          await navigator.clipboard.writeText(tokenUrl);
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<span>✓</span> Copied Blinded Token Link!';
+          btn.classList.remove('bg-slate-800', 'hover:bg-slate-900');
+          btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+          setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+            btn.classList.add('bg-slate-800', 'hover:bg-slate-900');
+          }, 2500);
+        } catch (err) {
+          console.error('Failed to copy blinded token link: ', err);
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // 5. SESSION VAULT TABLE (#tblSessionVault)
+      // ----------------------------------------------------------------------
+      function renderSessionTable() {
+        const sessions = getSessions();
+        const tbody = document.getElementById('tblSessionVaultBody');
+        tbody.innerHTML = '';
+
+        if (!sessions || sessions.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" class="px-4 py-8 text-center text-slate-400 font-sans italic">
+                No sessions registered yet in local vault. Generate links or click "Seed 8 Dummy Sessions" to test.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        sessions.forEach((s, idx) => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50 transition-colors';
+
+          // Status Badge
+          let statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700">Enrolled</span>';
+          if (s.status === 'COMPLETED') {
+            statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-semibold">Completed</span>';
+          } else if (s.status === 'INCOMPLETE') {
+            statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-red-100 text-red-800">Incomplete</span>';
+          }
+
+          // Timestamp format
+          let timeDisplay = '—';
+          if (s.startedAtIso) {
+            try {
+              const d = new Date(s.startedAtIso);
+              timeDisplay = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+              timeDisplay = s.startedAtIso;
+            }
+          }
+
+          // Dwell baseline
+          let dwellDisplay = '—';
+          if (s.s1b_floor && s.s1b_floor.case1TotalDwellSec) {
+            dwellDisplay = `${s.s1b_floor.case1TotalDwellSec.toFixed(1)}s`;
+          } else if (s.s1_onboarding && s.s1_onboarding.dwell_step1_ms) {
+            dwellDisplay = `${((s.s1_onboarding.dwell_step1_ms + s.s1_onboarding.dwell_step2_ms) / 1000).toFixed(1)}s (Onb)`;
+          }
+
+          // Shift 2 Directive
+          const shift2Dir = (s.s2b_shifts && s.s2b_shifts.shift2Directive) ? s.s2b_shifts.shift2Directive : '—';
+
+          // Scapegoat choice
+          let scapegoatChoice = '—';
+          if (s.s4_board_report) {
+            scapegoatChoice = s.s4_board_report.Task2_Choice_Label || (s.s4_board_report.Task2_Penalize_Sara_Binary === 1 ? 'PENALIZE_SARA' : 'ABSORB_BLAME');
+          }
+
+          // Sara %
+          let saraPct = '—';
+          if (s.s4_board_report && typeof s.s4_board_report.Task1A_Derived_Sara_Share_Pct === 'number') {
+            saraPct = `${s.s4_board_report.Task1A_Derived_Sara_Share_Pct.toFixed(1)}%`;
+          }
+
+          // Points / Payout
+          let ptsPayout = '—';
+          if (s.s5_outcome) {
+            ptsPayout = `${s.s5_outcome.finalManagerScorePts || 0} pts (€${(s.s5_outcome.finalPayoutEur || 0).toFixed(2)})`;
+          }
+
+          tr.innerHTML = `
+            <td class="px-3 py-2.5 font-bold text-slate-800">${escapeHtml(s.pid || 'N/A')}</td>
+            <td class="px-3 py-2.5 text-slate-600">${escapeHtml(timeDisplay)}</td>
+            <td class="px-3 py-2.5">
+              <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                s.arm === 1 ? 'bg-slate-100 text-slate-800' :
+                s.arm === 2 ? 'bg-blue-100 text-blue-800' :
+                s.arm === 3 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'
+              }">Arm ${s.arm}</span>
+            </td>
+            <td class="px-3 py-2.5 text-slate-600">${escapeHtml(dwellDisplay)}</td>
+            <td class="px-3 py-2.5 text-slate-600">${escapeHtml(shift2Dir)}</td>
+            <td class="px-3 py-2.5 text-slate-700">${escapeHtml(scapegoatChoice)}</td>
+            <td class="px-3 py-2.5 text-slate-700 font-bold">${escapeHtml(saraPct)}</td>
+            <td class="px-3 py-2.5 text-slate-800">${escapeHtml(ptsPayout)}</td>
+            <td class="px-3 py-2.5 text-right space-x-2">
+              ${statusBadge}
+              <button type="button" class="btn-delete-row text-red-500 hover:text-red-700 font-bold px-1 transition-colors" data-index="${idx}" title="Delete session">✕</button>
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+
+        // Attach delete row handlers
+        tbody.querySelectorAll('.btn-delete-row').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+            sessionToDeleteIndex = idx;
+            const targetSession = sessions[idx];
+            document.getElementById('txtDeleteRowMsg').textContent =
+              `Are you sure you want to delete session for participant ${targetSession ? targetSession.pid : ''}?`;
+            document.getElementById('modalDeleteRowConfirm').classList.remove('hidden');
+          });
+        });
+      }
+
+      function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // Delete Row Confirm Handlers
+      document.getElementById('btnCancelDeleteRow').addEventListener('click', () => {
+        document.getElementById('modalDeleteRowConfirm').classList.add('hidden');
+        sessionToDeleteIndex = null;
+      });
+
+      document.getElementById('btnConfirmDeleteRow').addEventListener('click', () => {
+        if (sessionToDeleteIndex !== null) {
+          const sessions = getSessions();
+          sessions.splice(sessionToDeleteIndex, 1);
+          saveSessions(sessions);
+          renderSessionTable();
+          updateBalancerUI();
+        }
+        document.getElementById('modalDeleteRowConfirm').classList.add('hidden');
+        sessionToDeleteIndex = null;
+      });
+
+      // Clear Vault Handlers
+      document.getElementById('btnClearVault').addEventListener('click', () => {
+        document.getElementById('modalClearVaultConfirm').classList.remove('hidden');
+      });
+
+      document.getElementById('btnCancelClearVault').addEventListener('click', () => {
+        document.getElementById('modalClearVaultConfirm').classList.add('hidden');
+      });
+
+      document.getElementById('btnConfirmClearVault').addEventListener('click', () => {
+        localStorage.removeItem(SESSIONS_KEY);
+        document.getElementById('modalClearVaultConfirm').classList.add('hidden');
+        renderSessionTable();
+        updateBalancerUI();
+      });
+
+      document.getElementById('btnRefreshVault').addEventListener('click', () => {
+        renderSessionTable();
+        updateBalancerUI();
+      });
+
+      // ----------------------------------------------------------------------
+      // 6. CSV & JSON TELEMETRY EXPORT TOOLS (Section 10.4)
+      // ----------------------------------------------------------------------
+      function downloadFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function escapeCsvCell(val) {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }
+
+      // Section 10.4 Canonical Column Headers Order
+      const CSV_HEADERS = [
+        'pid',
+        'session_id',
+        'timestamp_iso',
+        'status',
+        'arm',
+        'D2_stamp',
+        'D3_embodied',
+        'D4_eu_ai_act',
+        'speed_multiplier',
+        'station_metadata',
+        'sla_tier1',
+        'sla_tier2',
+        'sla_tier3',
+        'target_pts',
+        'shift_duration_sec',
+        's1b_executed',
+        's1b_case1_dwell_sec',
+        's1b_case1_pages_visited',
+        's1b_case1_page1_visited',
+        's1b_case1_page2_visited',
+        's1b_case1_page3_visited',
+        's1b_case2_dwell_sec',
+        's1b_case2_page1_visited',
+        's1b_case2_page2_visited',
+        's1b_case2_page3_visited',
+        's1b_case2_pages_visited',
+        's1b_case2_action',
+        's2a_initial_sla_pref_sec',
+        's2a_initial_archetype',
+        's2a_override_triggered',
+        's2b_shift2_directive',
+        's3_dwell_total_ms',
+        's3_page3_opened',
+        's3_box_d_dwell_ms',
+        'Task1A_slider_sara',
+        'Task1A_slider_ai',
+        'Task1A_slider_sla',
+        'Task1A_Derived_Sara_Share_Pct',
+        'Task1B_Root_Cause_Code',
+        'Task1C_CDS_Controllability_Sara',
+        'Task1C_CDS_SLA_Constraint',
+        'Task2_Penalize_Sara_Binary',
+        'Task2_Choice_Label',
+        'Task3_Justification_Char_Len',
+        'Task3_Justification_Text',
+        'Task4_Shift4_Sla_Reform_Sec',
+        'Task4_Shift4_Compliant_Binary',
+        'final_score_pts',
+        'bonus_unlocked_binary',
+        'integrity_credit_binary',
+        'final_payout_eur',
+        'completion_code'
+      ];
+
+      function resolveInspection(s1b, caseNum) {
+        if (!s1b || !s1b.executed) return null;
+        const prefix = caseNum === 1 ? 'case1' : 'case2';
+        let p1 = s1b[`${prefix}Page1Visited`];
+        let p2 = s1b[`${prefix}Page2Visited`];
+        let p3 = s1b[`${prefix}Page3Visited`];
+        const visitedArr = s1b[`${prefix}PagesVisited`];
+        if (Array.isArray(visitedArr) && visitedArr.length > 0) {
+          if (p1 === undefined) p1 = visitedArr.includes(1);
+          if (p2 === undefined) p2 = visitedArr.includes(2);
+          if (p3 === undefined) p3 = visitedArr.includes(3);
+        }
+        const count = s1b[`${prefix}PagesVisitedCount`] !== undefined ? s1b[`${prefix}PagesVisitedCount`] : (caseNum === 1 ? 3 : 2);
+        if (caseNum === 2) {
+          if (p3 === undefined) p3 = s1b.case2Page3Visited !== undefined ? s1b.case2Page3Visited : false;
+          if (p1 === undefined) p1 = count > 0;
+          if (p2 === undefined) {
+            if (count === 3) p2 = true;
+            else if (count === 2) p2 = !p3;
+            else p2 = false;
+          }
+        } else {
+          if (p1 === undefined) p1 = count > 0;
+          if (p2 === undefined) p2 = count >= 2;
+          if (p3 === undefined) p3 = count >= 3;
+        }
+        const p1Num = p1 ? 1 : 0;
+        const p2Num = p2 ? 1 : 0;
+        const p3Num = p3 ? 1 : 0;
+        const resolvedCount = (s1b[`${prefix}PagesVisitedCount`] !== undefined)
+          ? s1b[`${prefix}PagesVisitedCount`]
+          : (p1Num + p2Num + p3Num);
+        return {
+          p1: p1Num,
+          p2: p2Num,
+          p3: p3Num,
+          count: resolvedCount
+        };
+      }
+
+      document.getElementById('btnExportCsv').addEventListener('click', () => {
+        const sessions = getSessions();
+        if (!sessions || sessions.length === 0) {
+          alert('No sessions available in vault to export.');
+          return;
+        }
+
+        const rows = [CSV_HEADERS.join(',')];
+
+        sessions.forEach(s => {
+          const snap = s.config_snapshot || {};
+          const s1b = s.s1b_floor || {};
+          const c1 = resolveInspection(s1b, 1);
+          const c2 = resolveInspection(s1b, 2);
+          const s2a = s.s2a_policy || {};
+          const s2b = s.s2b_shifts || {};
+          const s3 = s.s3_audit || {};
+          const s4 = s.s4_board_report || {};
+          const s5 = s.s5_outcome || {};
+
+          const rowData = [
+            escapeCsvCell(s.pid || ''),
+            escapeCsvCell(s.sessionId || ''),
+            escapeCsvCell(s.startedAtIso || ''),
+            escapeCsvCell(s.status || ''),
+            escapeCsvCell(s.arm || ''),
+            escapeCsvCell(s.D2_stamp ?? (s.arm === 2 ? 1 : 0)),
+            escapeCsvCell(s.D3_embodied ?? (s.arm === 3 ? 1 : 0)),
+            escapeCsvCell(s.D4_eu_ai_act ?? (s.arm === 4 ? 1 : 0)),
+            escapeCsvCell(s.speedMultiplier ?? 1),
+            escapeCsvCell(s.stationMetadata || ''),
+            escapeCsvCell(snap.sla_tier1 ?? 25.0),
+            escapeCsvCell(snap.sla_tier2 ?? 38.0),
+            escapeCsvCell(snap.sla_tier3 ?? 60.0),
+            escapeCsvCell(snap.target_pts ?? 1200),
+            escapeCsvCell(snap.shift_duration_sec ?? 25.0),
+            escapeCsvCell(s1b.executed ? 1 : 0),
+            escapeCsvCell(s1b.case1TotalDwellSec ?? ''),
+            escapeCsvCell(s1b.executed ? (c1?.count ?? '') : (s1b.case1PagesVisitedCount ?? '')),
+            escapeCsvCell(s1b.executed ? (c1?.p1 ?? '') : (s1b.case1Page1Visited !== undefined ? (s1b.case1Page1Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.executed ? (c1?.p2 ?? '') : (s1b.case1Page2Visited !== undefined ? (s1b.case1Page2Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.executed ? (c1?.p3 ?? '') : (s1b.case1Page3Visited !== undefined ? (s1b.case1Page3Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.case2TotalDwellSec ?? ''),
+            escapeCsvCell(s1b.executed ? (c2?.p1 ?? '') : (s1b.case2Page1Visited !== undefined ? (s1b.case2Page1Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.executed ? (c2?.p2 ?? '') : (s1b.case2Page2Visited !== undefined ? (s1b.case2Page2Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.executed ? (c2?.p3 ?? '') : (s1b.case2Page3Visited !== undefined ? (s1b.case2Page3Visited ? 1 : 0) : '')),
+            escapeCsvCell(s1b.executed ? (c2?.count ?? '') : (s1b.case2PagesVisitedCount ?? '')),
+            escapeCsvCell(s1b.case2Action || ''),
+            escapeCsvCell(s2a.initialSlaPreferenceSec ?? ''),
+            escapeCsvCell(s2a.initialSlaArchetype || ''),
+            escapeCsvCell(s2a.corporateOverrideTriggered !== undefined ? (s2a.corporateOverrideTriggered ? 1 : 0) : ''),
+            escapeCsvCell(s2b.shift2Directive || ''),
+            escapeCsvCell(s3.dwell_s3_total_ms ?? ''),
+            escapeCsvCell(s3.page3Opened !== undefined ? (s3.page3Opened ? 1 : 0) : ''),
+            escapeCsvCell(s3.dwell_box_d_treatment_ms ?? ''),
+            escapeCsvCell(s4.sliderSara ?? ''),
+            escapeCsvCell(s4.sliderAi ?? ''),
+            escapeCsvCell(s4.sliderSla ?? ''),
+            escapeCsvCell(s4.Task1A_Derived_Sara_Share_Pct ?? ''),
+            escapeCsvCell(s4.Task1B_Root_Cause_Code || ''),
+            escapeCsvCell(s4.Task1C_CDS_Controllability_Sara ?? ''),
+            escapeCsvCell(s4.Task1C_CDS_SLA_Constraint ?? ''),
+            escapeCsvCell(s4.Task2_Penalize_Sara_Binary ?? ''),
+            escapeCsvCell(s4.Task2_Choice_Label || ''),
+            escapeCsvCell(s4.Task3_Justification_Char_Len ?? (s4.Task3_Justification_Text ? s4.Task3_Justification_Text.length : '')),
+            escapeCsvCell(s4.Task3_Justification_Text || ''),
+            escapeCsvCell(s4.Task4_Shift4_Sla_Reform_Sec ?? ''),
+            escapeCsvCell(s4.Task4_Shift4_Compliant_Binary ?? ''),
+            escapeCsvCell(s5.finalManagerScorePts ?? ''),
+            escapeCsvCell(s5.bonusUnlockedBinary ?? ''),
+            escapeCsvCell(s5.integrityCreditAwardedBinary ?? ''),
+            escapeCsvCell(s5.finalPayoutEur ?? ''),
+            escapeCsvCell(s.completionCode || '')
+          ];
+
+          rows.push(rowData.join(','));
+        });
+
+        const csvString = rows.join('\r\n');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        downloadFile(`tum_study_analysis_dataset_${timestamp}.csv`, csvString, 'text/csv;charset=utf-8;');
+      });
+
+      document.getElementById('btnExportJson').addEventListener('click', () => {
+        const sessions = getSessions();
+        if (!sessions || sessions.length === 0) {
+          alert('No sessions available in vault to export.');
+          return;
+        }
+        const hydratedSessions = sessions.map(s => {
+          if (!s || !s.s1b_floor || !s.s1b_floor.executed) return s;
+          const clone = JSON.parse(JSON.stringify(s));
+          const f = clone.s1b_floor;
+          const c1 = resolveInspection(f, 1);
+          const c2 = resolveInspection(f, 2);
+          if (c1) {
+            f.case1Page1Visited = Boolean(c1.p1);
+            f.case1Page2Visited = Boolean(c1.p2);
+            f.case1Page3Visited = Boolean(c1.p3);
+            f.case1PagesVisited = [1, 2, 3].filter(p => c1[`p${p}`]);
+            f.case1PagesUnopened = [1, 2, 3].filter(p => !c1[`p${p}`]);
+            f.case1PagesVisitedCount = c1.count;
+          }
+          if (c2) {
+            f.case2Page1Visited = Boolean(c2.p1);
+            f.case2Page2Visited = Boolean(c2.p2);
+            f.case2Page3Visited = Boolean(c2.p3);
+            f.case2PagesVisited = [1, 2, 3].filter(p => c2[`p${p}`]);
+            f.case2PagesUnopened = [1, 2, 3].filter(p => !c2[`p${p}`]);
+            f.case2PagesVisitedCount = c2.count;
+          }
+          return clone;
+        });
+        const jsonString = JSON.stringify(hydratedSessions, null, 2);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        downloadFile(`tum_study_telemetry_${timestamp}.json`, jsonString, 'application/json;charset=utf-8;');
+      });
+
+      // ----------------------------------------------------------------------
+      // 7. CONFIGURABLE SYNTHETIC COHORT GENERATOR & MULBERRY32 PRNG (Section 0.4)
+      // ----------------------------------------------------------------------
+      function mulberry32(a) {
+        a = a >>> 0;
+        return function() {
+          var t = a += 0x6D2B79F5;
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function buildSyntheticOutcome(arm, isPenalizeSara, isShift4Compliant, cfg, pointsPerCase, shift1Pts, shift2Pts, shift3PreCrashPts, provisionalHoldPts) {
+        let holdRelease = 0;
+        let regAdjustment = 0;
+        if (arm === 4) {
+          holdRelease = 0;
+          regAdjustment = (isPenalizeSara === 1)
+            ? (cfg.arm4PenalizeRetaliationFinePts ?? -50)
+            : (cfg.arm4AbsorbIntegrityCreditPts ?? 100);
+        } else {
+          holdRelease = (isPenalizeSara === 1)
+            ? (cfg.arms1To3PenalizeHoldReleasePts ?? 300)
+            : (cfg.arms1To3AbsorbHoldReleasePts ?? 0);
+          regAdjustment = 0;
+        }
+
+        const shift4Pts = (isShift4Compliant === 1)
+          ? (((cfg.shift4SafeCases ?? 25) * pointsPerCase) + (cfg.shift4SafeCatchBonusPts ?? 50))
+          : ((cfg.shift4FastCases ?? 26) * pointsPerCase);
+
+        const finalManagerScorePts = shift1Pts + shift2Pts + shift3PreCrashPts + provisionalHoldPts + holdRelease + regAdjustment + shift4Pts;
+
+        let bonusUnlockedBinary = 0;
+        let integrityCreditAwardedBinary = 0;
+        let finalPayoutEur = cfg.basePayEur ?? 2.50;
+
+        if (arm === 4) {
+          bonusUnlockedBinary = 0;
+          if (isPenalizeSara === 1) {
+            integrityCreditAwardedBinary = 0;
+            finalPayoutEur = Number((cfg.basePayEur ?? 2.50).toFixed(2));
+          } else {
+            integrityCreditAwardedBinary = 1;
+            finalPayoutEur = Number(((cfg.basePayEur ?? 2.50) + (cfg.arm4IntegrityCreditEur ?? 1.00)).toFixed(2));
+          }
+        } else {
+          integrityCreditAwardedBinary = 0;
+          if (finalManagerScorePts >= (cfg.bonusTargetPts ?? 1200)) {
+            bonusUnlockedBinary = 1;
+            finalPayoutEur = Number(((cfg.basePayEur ?? 2.50) + (cfg.performanceBonusEur ?? 4.00)).toFixed(2));
+          } else {
+            bonusUnlockedBinary = 0;
+            finalPayoutEur = Number((cfg.basePayEur ?? 2.50).toFixed(2));
+          }
+        }
+
+        return { finalManagerScorePts, bonusUnlockedBinary, integrityCreditAwardedBinary, finalPayoutEur };
+      }
+
+      function getSyntheticJustifications() {
+        return {
+          1: {
+            penalize: [
+              "Operator Sara signed off on an uninspected return ticket without checking physical weight.",
+              "Frontline inspection duty was neglected; Sara approved an empty carton without opening Page 3.",
+              "Sara failed standard intake protocol by trusting AI recommendation over physical scale readings."
+            ],
+            absorb: [
+              "The strict 25s timer caused systematic ergonomic overload for frontline staff.",
+              "Management pacing expectations created impossible inspection conditions for the team.",
+              "Frontline staff cannot reasonably complete a 3-page verification within a 25.0s window."
+            ]
+          },
+          2: {
+            penalize: [
+              "Even with telemetry warnings, the operator should have verified the inbound manifest.",
+              "Frontline staff must exercise human oversight when anomalies appear in the queue.",
+              "Operator ignored secondary scale metrics despite available REFA benchmark indications."
+            ],
+            absorb: [
+              "REFA telemetry diagnostic proved 23.5s ergonomic deficit; Sara could not comply.",
+              "Ergonomic deficit diagnostic confirms failure was an organizational design defect.",
+              "Systemic pacing forced reliance on copilot; REFA analysis shows 25s is insufficient."
+            ]
+          },
+          3: {
+            penalize: [
+              "Despite knowing inspection requirements, Sara failed to perform required weight verification.",
+              "Floor staff must prioritize fraud prevention over speed when clearing high-value returns."
+            ],
+            absorb: [
+              "Having worked the floor in Case 2, I know 25s makes inspecting Page 3 impossible.",
+              "Firsthand rotation proved the operational time-trap; penalizing Sara is unjust.",
+              "Direct floor experience demonstrated that 25s tempo prevents thorough multi-tab inspection."
+            ]
+          },
+          4: {
+            penalize: [
+              "Operator failed to maintain proper human-in-the-loop oversight despite statutory guidelines."
+            ],
+            absorb: [
+              "EU AI Act Art 14 requires human oversight conditions; the 25s quota violated this.",
+              "Statutory immunity applies under Article 99(4)(e). Frontline operator protected.",
+              "Article 14 whistleblower protection shields operator from management quota retaliation.",
+              "Statutory non-retaliation mandate requires systemic remediation rather than frontline punishment."
+            ]
+          }
+        };
+      }
+
+      function buildSyntheticBoardReport(arm, isPenalizeSara, rng, randRange, randInt, randChoice, justifications) {
+        let sliderSara, sliderAi, sliderSla, rootCauseCode, controllabilitySara, slaConstraint, s4ReformSec, isShift4Compliant;
+        if (arm === 1) {
+          if (isPenalizeSara) {
+            sliderSara = Number(randRange(5.5, 7.5).toFixed(1));
+            sliderAi = Number(randRange(1.5, 3.0).toFixed(1));
+            sliderSla = Number(randRange(1.0, 2.5).toFixed(1));
+            rootCauseCode = rng() < 0.70 ? "M-1" : "A-2";
+            controllabilitySara = randInt(7, 9);
+            slaConstraint = randInt(1, 3);
+            s4ReformSec = rng() < 0.75 ? 25.0 : 38.0;
+            isShift4Compliant = 0;
+          } else {
+            sliderSara = Number(randRange(2.0, 3.5).toFixed(1));
+            sliderAi = Number(randRange(3.0, 4.5).toFixed(1));
+            sliderSla = Number(randRange(6.5, 8.5).toFixed(1));
+            rootCauseCode = rng() < 0.65 ? "M-3" : "A-2";
+            controllabilitySara = randInt(2, 4);
+            slaConstraint = randInt(7, 9);
+            s4ReformSec = 60.0;
+            isShift4Compliant = 1;
+          }
+        } else if (arm === 2) {
+          if (isPenalizeSara) {
+            sliderSara = Number(randRange(3.5, 5.0).toFixed(1));
+            sliderAi = Number(randRange(3.0, 4.5).toFixed(1));
+            sliderSla = Number(randRange(6.0, 7.5).toFixed(1));
+            rootCauseCode = rng() < 0.50 ? "M-1" : "M-3";
+            controllabilitySara = randInt(5, 7);
+            slaConstraint = randInt(6, 8);
+            s4ReformSec = rng() < 0.50 ? 25.0 : 38.0;
+            isShift4Compliant = 0;
+          } else {
+            sliderSara = Number(randRange(1.5, 3.0).toFixed(1));
+            sliderAi = Number(randRange(3.5, 5.5).toFixed(1));
+            sliderSla = Number(randRange(7.5, 9.0).toFixed(1));
+            rootCauseCode = "M-3";
+            controllabilitySara = randInt(1, 3);
+            slaConstraint = randInt(8, 10);
+            s4ReformSec = 60.0;
+            isShift4Compliant = 1;
+          }
+        } else if (arm === 3) {
+          if (isPenalizeSara) {
+            sliderSara = Number(randRange(3.0, 4.5).toFixed(1));
+            sliderAi = Number(randRange(3.0, 4.5).toFixed(1));
+            sliderSla = Number(randRange(6.5, 8.0).toFixed(1));
+            rootCauseCode = rng() < 0.60 ? "M-1" : "M-3";
+            controllabilitySara = randInt(4, 6);
+            slaConstraint = randInt(7, 9);
+            s4ReformSec = 38.0;
+            isShift4Compliant = 0;
+          } else {
+            sliderSara = Number(randRange(1.2, 2.2).toFixed(1));
+            sliderAi = Number(randRange(3.0, 4.5).toFixed(1));
+            sliderSla = Number(randRange(8.0, 9.5).toFixed(1));
+            rootCauseCode = "M-3";
+            controllabilitySara = randInt(1, 2);
+            slaConstraint = randInt(9, 10);
+            s4ReformSec = 60.0;
+            isShift4Compliant = 1;
+          }
+        } else { // Arm 4
+          if (isPenalizeSara) {
+            sliderSara = Number(randRange(2.5, 4.0).toFixed(1));
+            sliderAi = Number(randRange(4.5, 6.0).toFixed(1));
+            sliderSla = Number(randRange(7.0, 8.5).toFixed(1));
+            rootCauseCode = "A-2";
+            controllabilitySara = randInt(3, 5);
+            slaConstraint = randInt(7, 9);
+            s4ReformSec = 38.0;
+            isShift4Compliant = 0;
+          } else {
+            sliderSara = Number(randRange(0.8, 1.8).toFixed(1));
+            sliderAi = Number(randRange(5.0, 7.0).toFixed(1));
+            sliderSla = Number(randRange(8.0, 9.5).toFixed(1));
+            rootCauseCode = "M-3";
+            controllabilitySara = randInt(1, 2);
+            slaConstraint = randInt(9, 10);
+            s4ReformSec = 60.0;
+            isShift4Compliant = 1;
+          }
+        }
+
+        const sliderSum = sliderSara + sliderAi + sliderSla;
+        const derivedSaraSharePct = sliderSum > 0 ? Number(((sliderSara / sliderSum) * 100).toFixed(2)) : 33.33;
+        const justList = isPenalizeSara ? justifications[arm].penalize : justifications[arm].absorb;
+        const justificationText = randChoice(justList);
+
+        return {
+          sliderSara, sliderAi, sliderSla,
+          Task1A_Derived_Sara_Share_Pct: derivedSaraSharePct,
+          Task1B_Root_Cause_Code: rootCauseCode,
+          Task1C_CDS_Controllability_Sara: controllabilitySara,
+          Task1C_CDS_SLA_Constraint: slaConstraint,
+          Task2_Penalize_Sara_Binary: isPenalizeSara,
+          Task2_Choice_Label: isPenalizeSara ? "PENALIZE_SARA" : "ABSORB_BLAME",
+          Task3_Justification_Text: justificationText,
+          Task3_Justification_Char_Len: justificationText.length,
+          Task4_Shift4_Sla_Reform_Sec: s4ReformSec,
+          Task4_Shift4_Compliant_Binary: isShift4Compliant
+        };
+      }
+
+      function generateSingleSyntheticSession(i, intakeCount, arm, armSeqNum, baseTimeMs, hasSeed, rng, randRange, randInt, randChoice, stations, justifications, cfg, pointsPerCase, config_snapshot) {
+        const pid = `P_${arm}${String(armSeqNum).padStart(3, '0')}`;
+        const startedAtMs = baseTimeMs - (intakeCount - i) * 120000 - Math.floor(randRange(5000, 25000));
+        const durationMs = Math.floor(randRange(900000, 1200000));
+        const completedAtMs = startedAtMs + durationMs;
+        const startedAtIso = new Date(startedAtMs).toISOString();
+        const completedAtIso = new Date(completedAtMs).toISOString();
+        const sessionId = `S_${pid}_${startedAtMs}`;
+        const hexSuffix = Math.floor(rng() * 0x10000).toString(16).toUpperCase().padStart(4, '0');
+        const completionCode = `TUM-DONE-${pid}-${hexSuffix}`;
+
+        const s1_onboarding = {
+          dwell_step1_ms: Math.floor(randRange(9500, 14500)),
+          dwell_step2_ms: Math.floor(randRange(11500, 16500)),
+          dwell_step3_ms: Math.floor(randRange(9000, 13000)),
+          dwell_step4_ms: Math.floor(randRange(10500, 15500)),
+          dwell_step5_ms: Math.floor(randRange(7500, 11500))
+        };
+        if (arm === 3) s1_onboarding.dwell_step6_ms = Math.floor(randRange(9000, 13000));
+
+        let s1b_floor;
+        if (arm === 3) {
+          const isQuickApprove = rng() < 0.85;
+          s1b_floor = {
+            executed: true,
+            case1TotalDwellSec: Number(randRange(44.0, 54.0).toFixed(1)),
+            case1Page1Visited: true, case1Page2Visited: true, case1Page3Visited: true,
+            case1PagesVisited: [1, 2, 3], case1PagesUnopened: [], case1PagesVisitedCount: 3,
+            case2TotalDwellSec: Number(randRange(17.0, 23.5).toFixed(1)),
+            case2Page1Visited: true, case2Page2Visited: true, case2Page3Visited: false,
+            case2PagesVisited: [1, 2], case2PagesUnopened: [3], case2PagesVisitedCount: 2,
+            case2Action: isQuickApprove ? "QUICK_APPROVE" : "ESCALATE"
+          };
+        } else {
+          s1b_floor = { executed: false };
+        }
+
+        const prefRoll = rng();
+        let initialPref = 25.0, initialArchetype = "SPEED_25S", overrideTriggered = false;
+        if (prefRoll > 0.80) {
+          initialPref = 60.0; initialArchetype = "QUALITY_60S"; overrideTriggered = true;
+        } else if (prefRoll > 0.55) {
+          initialPref = 38.0; initialArchetype = "BALANCED_38S"; overrideTriggered = true;
+        }
+        const s2a_policy = {
+          initialSlaPreferenceSec: initialPref,
+          initialSlaArchetype: initialArchetype,
+          corporateOverrideTriggered: overrideTriggered
+        };
+
+        const isDirectiveB = rng() < 0.25;
+        const shift2Directive = isDirectiveB ? "B_AUDIT_VERIFY" : "A_TRUST_AI";
+        const shift1Pts = (cfg.shift1TargetCases ?? 36) * pointsPerCase;
+        const shift2Pts = isDirectiveB
+          ? ((cfg.shift2DirectiveBCases ?? 32) * pointsPerCase)
+          : ((cfg.shift2DirectiveACases ?? 36) * pointsPerCase);
+        const shift3PreCrashPts = (cfg.shift3PreCrashCases ?? 27) * pointsPerCase;
+        const provisionalHoldPts = cfg.provisionalHoldPts ?? -300;
+        const s2b_shifts = { shift1Pts, shift2Directive, shift2Pts, shift3PreCrashPts, provisionalHoldPts };
+
+        let dwell_box_d = 0;
+        if (arm === 2) dwell_box_d = Math.floor(randRange(10000, 14500));
+        else if (arm === 3) dwell_box_d = Math.floor(randRange(9000, 13000));
+        else if (arm === 4) dwell_box_d = Math.floor(randRange(12000, 16500));
+        const s3_audit = {
+          dwell_s3_total_ms: Math.floor(randRange(28000, 42000)),
+          page1Opened: true, page2Opened: true, page3Opened: true,
+          dwell_box_d_treatment_ms: dwell_box_d
+        };
+
+        const blameProb = { 1: 0.65, 2: 0.45, 3: 0.40, 4: 0.15 }[arm];
+        const isPenalizeSara = rng() < blameProb ? 1 : 0;
+        const s4_board_report = buildSyntheticBoardReport(arm, isPenalizeSara, rng, randRange, randInt, randChoice, justifications);
+        const s5_outcome = buildSyntheticOutcome(arm, isPenalizeSara, s4_board_report.Task4_Shift4_Compliant_Binary, cfg, pointsPerCase, shift1Pts, shift2Pts, shift3PreCrashPts, provisionalHoldPts);
+
+        return {
+          sessionId, pid, arm,
+          D2_stamp: arm === 2 ? 1 : 0,
+          D3_embodied: arm === 3 ? 1 : 0,
+          D4_eu_ai_act: arm === 4 ? 1 : 0,
+          speedMultiplier: 1,
+          stationMetadata: randChoice(stations),
+          status: "COMPLETED",
+          startedAtIso, completedAtIso, completionCode,
+          config_snapshot,
+          s1_onboarding, s1b_floor, s2a_policy, s2b_shifts, s3_audit,
+          s4_board_report, s5_outcome
+        };
+      }
+
+      function generateSyntheticSessions(count, mode, seed) {
+        const cfg = getActiveConfig();
+        const existingSessions = getSessions();
+        const intakeCount = Math.max(1, parseInt(count, 10) || (cfg.targetCohortN || 240));
+        const intakeMode = (mode === 'append') ? 'append' : 'replace';
+
+        const hasSeed = seed !== undefined && seed !== null && String(seed).trim() !== '' && !isNaN(Number(seed));
+        const rng = hasSeed ? mulberry32(Number(seed) >>> 0) : Math.random;
+
+        const randRange = (min, max) => min + rng() * (max - min);
+        const randInt = (min, max) => Math.floor(min + rng() * (max - min + 1));
+        const randChoice = (arr) => arr[Math.floor(rng() * arr.length)];
+
+        const stations = [
+          "Tobii Station A - Lab Room 204",
+          "Tobii Station B - Lab Room 204",
+          "Tobii Station C - Lab Room 204",
+          "Online Prolific Wave 1"
+        ];
+        const justifications = getSyntheticJustifications();
+        const pointsPerCase = cfg.pointsPerCase ?? 10;
+        const config_snapshot = {
+          sla_tier1: cfg.tier1SlaSec ?? 25.0,
+          sla_tier2: cfg.tier2SlaSec ?? 38.0,
+          sla_tier3: cfg.tier3SlaSec ?? 60.0,
+          target_pts: cfg.bonusTargetPts ?? 1200,
+          shift_duration_sec: cfg.shiftDurationSimSec ?? 25.0,
+          base_pay_eur: cfg.basePayEur ?? 2.50,
+          bonus_eur: cfg.performanceBonusEur ?? 4.00,
+          arm4_integrity_eur: cfg.arm4IntegrityCreditEur ?? 1.00,
+          tier1SlaSec: cfg.tier1SlaSec ?? 25.0,
+          tier2SlaSec: cfg.tier2SlaSec ?? 38.0,
+          tier3SlaSec: cfg.tier3SlaSec ?? 60.0,
+          bonusTargetPts: cfg.bonusTargetPts ?? 1200,
+          shiftDurationSimSec: cfg.shiftDurationSimSec ?? 25.0,
+          basePayEur: cfg.basePayEur ?? 2.50,
+          performanceBonusEur: cfg.performanceBonusEur ?? 4.00,
+          arm4IntegrityCreditEur: cfg.arm4IntegrityCreditEur ?? 1.00
+        };
+
+        const currentCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        const armSeq = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        if (intakeMode === 'append') {
+          existingSessions.forEach(s => {
+            const a = parseInt(s.arm, 10);
+            if (currentCounts[a] !== undefined) currentCounts[a]++;
+            if (armSeq[a] !== undefined) armSeq[a]++;
+          });
+        }
+
+        const newSessions = [];
+        const baseTimeMs = hasSeed ? 1731000000000 : Date.now();
+
+        for (let i = 0; i < intakeCount; i++) {
+          let arm;
+          if (intakeMode === 'append') {
+            const minCount = Math.min(currentCounts[1], currentCounts[2], currentCounts[3], currentCounts[4]);
+            arm = [1, 2, 3, 4].find(a => currentCounts[a] === minCount);
+            currentCounts[arm]++;
+          } else {
+            arm = (i % 4) + 1;
+          }
+
+          armSeq[arm]++;
+          const sessionObj = generateSingleSyntheticSession(
+            i, intakeCount, arm, armSeq[arm], baseTimeMs, hasSeed, rng,
+            randRange, randInt, randChoice, stations, justifications,
+            cfg, pointsPerCase, config_snapshot
+          );
+          newSessions.push(sessionObj);
+        }
+
+        const finalSessions = (intakeMode === 'append') ? existingSessions.concat(newSessions) : newSessions;
+        saveSessions(finalSessions);
+        renderSessionTable();
+        updateBalancerUI();
+        return finalSessions;
+      }
+
+      // Attach Global Window Ref for Testing & Automation
+      window.generateSyntheticSessions = generateSyntheticSessions;
+
+      // Event Listener Wiring
+      document.getElementById('btnSeedDummyData').addEventListener('click', () => {
+        const inputCount = document.getElementById('inputSeedCount');
+        const count = inputCount ? parseInt(inputCount.value, 10) : 8;
+        const selectMode = document.getElementById('selectSeedMode');
+        const mode = selectMode ? selectMode.value : 'replace';
+        const inputPrng = document.getElementById('inputSeedPrng');
+        const seed = inputPrng ? inputPrng.value : '';
+        generateSyntheticSessions(count, mode, seed);
+      });
+
+      // Quick Preset Listeners
+      const attachPreset = (btnId, val) => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const input = document.getElementById('inputSeedCount');
+            if (input) input.value = typeof val === 'function' ? val() : val;
+          });
+        }
+      };
+      attachPreset('btnPresetSeed8', 8);
+      attachPreset('btnPresetSeed24', 24);
+      attachPreset('btnPresetSeed60', 60);
+      attachPreset('btnPresetCohortN', () => (getActiveConfig().targetCohortN || 240));
+
+      // ----------------------------------------------------------------------
+      // 8. JSON EXPERIMENT CONFIG ENGINE (#configEngineCard)
+      // ----------------------------------------------------------------------
+      function updateConfigBadgeUI() {
+        const badge = document.getElementById('activeConfigBadge');
+        const cfg = getActiveConfig();
+
+        if (isCustomConfigActive()) {
+          const timeStr = cfg.updatedAtIso ? new Date(cfg.updatedAtIso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active';
+          badge.textContent = `🟢 Active Custom Profile (${timeStr})`;
+          badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-100 text-emerald-800 border border-emerald-300';
+        } else {
+          badge.textContent = 'Default Baseline Protocol (v2.4.0-mvp2-locked)';
+          badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-blue-100 text-blue-800 border border-blue-200';
+        }
+
+        // Hydrate the 4 summary grid items
+        const elSla = document.getElementById('cfgSummarySla');
+        if (elSla) {
+          elSla.textContent = `SLA Tiers: ${cfg.tier1SlaSec}s / ${cfg.tier2SlaSec}s / ${cfg.tier3SlaSec}s`;
+        }
+
+        const elShift = document.getElementById('cfgSummaryShiftDuration');
+        if (elShift) {
+          elShift.textContent = `Shift Duration: ${cfg.shiftDurationSimSec}s`;
+        }
+
+        const elHurdle = document.getElementById('cfgSummaryHurdle');
+        if (elHurdle) {
+          const bonusPts = typeof cfg.bonusTargetPts === 'number' ? cfg.bonusTargetPts : 1200;
+          elHurdle.textContent = `Hurdle: ${bonusPts.toLocaleString()} pts`;
+        }
+
+        const elTargetN = document.getElementById('cfgSummaryTargetN');
+        if (elTargetN) {
+          const cohortN = typeof cfg.targetCohortN === 'number' ? cfg.targetCohortN : 240;
+          elTargetN.textContent = `Target N: ${cohortN} (${Math.round(cohortN / 4)}/arm)`;
+        }
+
+        // Synchronize balancer UI to ensure denominators and header reflect active cfg
+        updateBalancerUI();
+      }
+
+      window.updateConfigBadgeUI = updateConfigBadgeUI;
+      window.updateBalancerUI = updateBalancerUI;
+
+      document.getElementById('btnDownloadConfig').addEventListener('click', () => {
+        const jsonStr = JSON.stringify(DEFAULT_EXPERIMENT_CONFIG, null, 2);
+        downloadFile('tum_experiment_config.json', jsonStr, 'application/json;charset=utf-8;');
+      });
+
+      document.getElementById('btnResetConfig').addEventListener('click', () => {
+        localStorage.removeItem(CONFIG_KEY);
+        updateConfigBadgeUI();
+        updateBalancerUI();
+        alert('Active experiment configuration reset to canonical baseline defaults.');
+      });
+
+      // Schema Validator
+      function validateConfigSchema(obj) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+          return { valid: false, error: 'Config must be a valid JSON object.' };
+        }
+        const requiredNums = [
+          'targetCohortN', 'pointsPerCase', 'bonusTargetPts', 'basePayEur',
+          'performanceBonusEur', 'tier1SlaSec', 'tier2SlaSec', 'tier3SlaSec',
+          'refaBaselineSec', 'shiftDurationSimSec'
+        ];
+        for (const key of requiredNums) {
+          if (typeof obj[key] !== 'number' || isNaN(obj[key])) {
+            return { valid: false, error: `Missing or invalid numerical parameter: '${key}'` };
+          }
+        }
+        if (obj.tier1SlaSec <= 0 || obj.bonusTargetPts < 500) {
+          return { valid: false, error: 'Parameter constraints violated: tier1SlaSec must be > 0 and bonusTargetPts >= 500.' };
+        }
+        return { valid: true };
+      }
+
+      // Drag and drop setup
+      const dropZone = document.getElementById('dropZoneConfig');
+      const fileInput = document.getElementById('inputFileConfig');
+      const errBanner = document.getElementById('configErrorBanner');
+
+      dropZone.addEventListener('click', () => fileInput.click());
+
+      ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          processConfigFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          processConfigFile(e.target.files[0]);
+        }
+      });
+
+      function processConfigFile(file) {
+        errBanner.classList.add('hidden');
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            const val = validateConfigSchema(parsed);
+            if (!val.valid) {
+              errBanner.textContent = `❌ Schema Validation Error: ${val.error}`;
+              errBanner.classList.remove('hidden');
+              return;
+            }
+            // Valid! Prepare Diff Modal
+            pendingImportedConfig = parsed;
+            showConfigDiffModal(parsed);
+          } catch (e) {
+            errBanner.textContent = '❌ Failed to parse JSON file. Ensure valid JSON format.';
+            errBanner.classList.remove('hidden');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function showConfigDiffModal(importedCfg) {
+        const currentCfg = getActiveConfig();
+        const tbody = document.getElementById('tblConfigDiffBody');
+        tbody.innerHTML = '';
+
+        const allKeys = Array.from(new Set([...Object.keys(DEFAULT_EXPERIMENT_CONFIG), ...Object.keys(importedCfg)]));
+        let diffCount = 0;
+
+        allKeys.forEach(key => {
+          const currentVal = currentCfg[key];
+          const importedVal = importedCfg[key];
+          const isChanged = JSON.stringify(currentVal) !== JSON.stringify(importedVal);
+
+          if (isChanged) diffCount++;
+
+          const tr = document.createElement('tr');
+          if (isChanged) {
+            tr.className = 'bg-[#ECFDF5] text-[#059669] font-semibold';
+          } else {
+            tr.className = 'text-slate-600';
+          }
+
+          tr.innerHTML = `
+            <td class="px-4 py-2 text-slate-800 font-mono">${escapeHtml(key)}</td>
+            <td class="px-4 py-2 font-mono">${escapeHtml(JSON.stringify(currentVal))}</td>
+            <td class="px-4 py-2 font-mono ${isChanged ? 'text-emerald-700 font-bold' : ''}">
+              ${escapeHtml(JSON.stringify(importedVal))}
+              ${isChanged ? ' <span class="text-[10px] uppercase font-bold text-emerald-600 ml-1">● Modified</span>' : ''}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('txtDiffSummary').textContent = `${diffCount} parameter${diffCount === 1 ? '' : 's'} modified`;
+        document.getElementById('modalConfigDiff').classList.remove('hidden');
+      }
+
+      document.getElementById('btnCancelConfigDiff').addEventListener('click', () => {
+        document.getElementById('modalConfigDiff').classList.add('hidden');
+        pendingImportedConfig = null;
+        fileInput.value = '';
+      });
+
+      document.getElementById('btnConfirmConfigDiff').addEventListener('click', () => {
+        if (pendingImportedConfig) {
+          pendingImportedConfig.updatedAtIso = new Date().toISOString();
+          localStorage.setItem(CONFIG_KEY, JSON.stringify(pendingImportedConfig));
+          updateConfigBadgeUI();
+          document.getElementById('modalConfigDiff').classList.add('hidden');
+          pendingImportedConfig = null;
+          fileInput.value = '';
+          alert('✓ New experiment configuration profile confirmed and applied successfully.');
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // 9. DATAPIPE GATEWAY (#dataPipeCard)
+      // ----------------------------------------------------------------------
+      document.getElementById('btnTestDatapipe').addEventListener('click', async () => {
+        const statusEl = document.getElementById('statusDatapipe');
+        statusEl.textContent = '⏳ Testing Gateway Endpoint...';
+        statusEl.className = 'inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300';
+
+        try {
+          // Send an OPTIONS or safe ping to jsPsych DataPipe
+          const res = await fetch('https://pipe.jspsych.org/api/data/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              experimentID: "30e5A1M4ut54",
+              filename: "ping_test.json",
+              data: JSON.stringify({ test: true, timestamp: Date.now() })
+            })
+          });
+
+          if (res.ok || res.status === 200 || res.status === 201) {
+            statusEl.textContent = '🟢 DataPipe Gateway: Connected & Active (200 OK)';
+            statusEl.className = 'inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300';
+          } else {
+            statusEl.textContent = `🟡 DataPipe Endpoint Reached (HTTP ${res.status})`;
+            statusEl.className = 'inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300';
+          }
+        } catch (e) {
+          // If offline or blocked by CORS during local file testing
+          statusEl.textContent = '🟡 Local Mode / Offline Fallback Active (Local Storage Guaranteed)';
+          statusEl.className = 'inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300';
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // 9B. REVIEWER ACCESS GATE ENFORCEMENT
+      // ----------------------------------------------------------------------
+      function enforceReviewerGate() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('access');
+        if (token === 'demo2026' || token === 'tum2026') {
+          sessionStorage.setItem('tum_auth_validated', '1');
+        }
+        const isAuth = sessionStorage.getItem('tum_auth_validated') === '1';
+        const gateEl = document.getElementById('reviewerAccessGate');
+        if (!isAuth) {
+          if (gateEl) gateEl.classList.remove('hidden');
+          return false;
+        } else {
+          if (gateEl) gateEl.classList.add('hidden');
+          return true;
+        }
+      }
+
+      function initAdmin() {
+        document.getElementById('inputPid').value = generateHexPid();
+        updateBalancerUI();
+        renderSessionTable();
+        updateConfigBadgeUI();
+      }
+
+      window.handleReviewerAuthSubmit = function(e) {
+        e.preventDefault();
+        const input = document.getElementById('inputGateToken');
+        const err = document.getElementById('gateErrorMsg');
+        if (input && (input.value.trim() === 'demo2026' || input.value.trim() === 'tum2026')) {
+          sessionStorage.setItem('tum_auth_validated', '1');
+          const gateEl = document.getElementById('reviewerAccessGate');
+          if (gateEl) gateEl.classList.add('hidden');
+          if (err) err.classList.add('hidden');
+          initAdmin();
+        } else {
+          if (err) err.classList.remove('hidden');
+        }
+      };
+
+      // ----------------------------------------------------------------------
+      // 10. INITIALIZATION
+      // ----------------------------------------------------------------------
+      if (enforceReviewerGate()) {
+        initAdmin();
+      }
+
+    })();
+  </script>
+</body>
+</html>
