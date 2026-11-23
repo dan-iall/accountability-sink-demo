@@ -290,19 +290,28 @@ def _binary_mde_fixed_point(n1: int, n2: int, p1: float = 0.50, r2: float = 0.18
 
 def run_model_4_power_table() -> None:
     """Model 4: Closed-form parameterized power & MDE calibration table."""
-    print("\n=== MODEL 4: CLOSED-FORM POWER & MDE CALIBRATION (alpha=0.05, 1-beta=0.80, p1=0.50) ===")
+    print("\n=== MODEL 4: CLOSED-FORM POWER & MDE CALIBRATION (alpha=0.05, 1-beta=0.80, p1=0.80/0.50) ===")
     c = float(norm.ppf(0.975) + norm.ppf(0.80))
-    for label, n_arm, n_total in [("N1=240 (n=60/arm)", 60, 240), ("N2=480 (n=120/arm)", 120, 480)]:
+    for label, n_arm, p1 in [
+        ("N1a=80 (n=20/arm, p1=0.80)", 20, 0.80),
+        ("N1b=120 (n=30/arm, p1=0.80)", 30, 0.80),
+        ("N2=240 (n=60/arm, p1=0.50)", 60, 0.50),
+    ]:
         d_unadj = c * np.sqrt(2.0 / n_arm)
         d_adj = c * np.sqrt(2.0 * (1.0 - 0.18) / n_arm)
-        dp_unadj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=0.50, r2=0.0)
-        dp_adj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=0.50, r2=0.18)
+        dp_unadj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=p1, r2=0.0)
+        dp_adj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=p1, r2=0.18)
         print(
-            f"  {label:18s}: d_unadj={d_unadj:.3f} SD | d_adj(R2=0.18)={d_adj:.3f} SD | "
+            f"  {label:28s}: d_unadj={d_unadj:.3f} SD | d_adj(R2=0.18)={d_adj:.3f} SD | "
             f"binary_dp(R2=0.00)={dp_unadj:.2f} pp | binary_dp(R2=0.18)={dp_adj:.2f} pp"
         )
-    dp_shift2 = 100.0 * c * np.sqrt(0.50 * 0.50 * (1.0 / 60.0 + 1.0 / 180.0))
-    print(f"  Pooled Shift 2 (Arm 3 n=60 vs {{1,2,4}} n=180, R2=0.00): binary_dp={dp_shift2:.2f} pp")
+    dp_shift2_n80 = 100.0 * c * np.sqrt(0.50 * 0.50 * (1.0 / 20.0 + 1.0 / 60.0))
+    dp_shift2_n120 = 100.0 * c * np.sqrt(0.50 * 0.50 * (1.0 / 30.0 + 1.0 / 90.0))
+    dp_shift2_n240 = 100.0 * c * np.sqrt(0.50 * 0.50 * (1.0 / 60.0 + 1.0 / 180.0))
+    print(
+        f"  Pooled Shift 2 (Arm 3 vs {{1,2,4}}, R2=0.00): "
+        f"N1=80..120={dp_shift2_n80:.2f}..{dp_shift2_n120:.2f} pp | N2=240={dp_shift2_n240:.2f} pp"
+    )
 
 
 def main() -> None:

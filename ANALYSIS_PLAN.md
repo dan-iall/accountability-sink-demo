@@ -128,19 +128,19 @@ where $\mathbf{z}_i = (1, D_{2i}, D_{3i}, D_{4i}, \mathbf{X}_i')'$. A negative e
 
 ### 4.1 Parameterized Sample-Size Governance
 
-Because true baseline sanctioning ($p_1$), outcome variance ($\sigma$), and pre-treatment covariate explanatory power ($R_{\mathbf{X}}^2$) are unobserved prior to human data collection, final sample sizes are **parameterized rather than fixed in advance**. An initial online and lab pilot verifies JSON-configurable task parameters (`tum_experiment_config.json`) against floor or ceiling saturation using **blinded Control-arm calibration**—estimating $(\hat{p}_1, \hat{\sigma}, \hat{R}_{\mathbf{X}}^2)$ without inspecting treatment contrasts, thereby preserving exact Type I error control ($\alpha = 0.05$).
+Because true baseline sanctioning ($p_1$), outcome variance ($\sigma$), and pre-treatment covariate explanatory power ($R_{\mathbf{X}}^2$) are unobserved prior to human data collection, final sample sizes are **parameterized rather than fixed in advance**. An initial calibration pilot ($n = 8\text{–}10/\text{arm}$, $N_{\text{pilot}} = 32\text{–}40$) verifies JSON-configurable task parameters (`tum_experiment_config.json`) against floor or ceiling saturation using **blinded Control-arm calibration**—estimating $(\hat{p}_1, \hat{\sigma}, \hat{R}_{\mathbf{X}}^2)$ without inspecting treatment contrasts, which preserves exact Type I error control ($\alpha = 0.05$). If participants lean strongly toward sanctioning under the €4.00 bonus hold ($p_1 \ge 0.75\text{–}0.80$), Bernoulli variance $p_1(1-p_1)$ shrinks and treatment separation $\Delta p$ widens, so smaller cohorts reach $80\%$ power (`Cohort 1`, $N_1 = 80\text{–}120$, $n = 20\text{–}30/\text{arm}$) than under a noisy $p_1 = 0.50$ split (`Cohort 2`, $N_2 = 240$, $n = 60/\text{arm}$).
 
 ### 4.2 Closed-Form MDE Benchmarks (`analysis/power_simulation.py`)
 
-Table 4.1 reports exact two-tailed Minimum Detectable Effects ($\alpha = 0.05$, power $1 - \beta = 0.80$, $z_{0.975} + z_{0.80} = 2.8016$) under the conservative worst-case binary baseline $p_1 = 0.50$, showing both unadjusted ($R_{\mathbf{X}}^2 = 0.00$) and covariate-adjusted ($R_{\mathbf{X}}^2 = 0.18$) benchmarks verified directly by running `analysis/power_simulation.py`:
+Table 4.1 reports exact two-tailed Minimum Detectable Effects ($\alpha = 0.05$, power $1 - \beta = 0.80$, $z_{0.975} + z_{0.80} = 2.8016$), showing both unadjusted ($R_{\mathbf{X}}^2 = 0.00$) and covariate-adjusted ($R_{\mathbf{X}}^2 = 0.18$) benchmarks verified directly by running `analysis/power_simulation.py`:
 
 | Cohort / Contrast | Sample Allocation | Continuous MDE (Unadj. / Adj.) | Binary MDE $\Delta p$ (Unadj., $R^2=0$) | Binary MDE $\Delta p$ (Adj., $R_{\mathbf{X}}^2=0.18$) | Primary Purpose |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Benchmark Cohort 1 ($N_1=240$)** | $n=60/\text{arm}$ (4 arms) | `0.511` / `0.463 SD` | **`-24.05 pp`** (`-24.1 pp`) | **`-22.01 pp`** (`-22.0 pp`) | Primary treatment vs. Control ATEs ($H_1, H_2, H_4$) & within-subject distortion ($\delta$) |
-| **Benchmark Cohort 2 ($N_2=480$)** | $n=120/\text{arm}$ (4 arms) | `0.362` / `0.328 SD` | **`-17.52 pp`** (`-17.5 pp`) | **`-15.95 pp`** (`-16.0 pp`) | Active-arm contrasts (`Arm 3 vs. Arm 2`, `Arm 4 vs. Arm 2`) & planned Phase 2 `Arm 4a` vs. `4b` split |
-| **Pooled Shift 2 First-Stage** | Arm 3 ($n=60$) vs. $\{1,2,4\}$ ($n=180$) | — | **`20.88 pp`** (`20.9 pp`) | — | Tripartite protocol pooled Shift 2 escalation test (`s2b_shift2_directive`) |
+| **Benchmark Cohort 1 ($N_1=80\text{–}120$, Directional-Skew Regime)** | $n=20\text{–}30/\text{arm}$ (4 arms) | `0.723–0.886` / `0.655–0.802 SD` | **`-32.72 to -39.65 pp`** (`-32.2 to -39.7 pp`) | **`-29.66 to -36.16 pp`** (`-29.7 to -36.2 pp`) | Primary treatment vs. Control ATEs ($H_1, H_2, H_4$) & within-subject distortion ($\delta$, $2N_1=160\text{–}240$) |
+| **Benchmark Cohort 2 ($N_2=240$, Conservative $p_1=0.50$ Bound)** | $n=60/\text{arm}$ (4 arms) | `0.511` / `0.463 SD` | **`-24.05 pp`** (`-24.1 pp`) | **`-22.01 pp`** (`-22.0 pp`) | Primary & active-arm contrasts (`Arm 3 vs. Arm 2`, `Arm 4 vs. Arm 2`) & planned Phase 2 `Arm 4a` vs. `4b` split |
+| **Pooled Shift 2 First-Stage** | Arm 3 vs. $\{1,2,4\}$ ($N_1=80\text{–}120$; $N_2=240$) | — | **`29.53–36.17 pp`** ($N_1$) / **`20.88 pp`** ($N_2$) | — | Tripartite protocol pooled Shift 2 escalation test (`s2b_shift2_directive`) |
 
-Because pre-treatment survey traits on binary behavioral choices frequently yield $R_{\mathbf{X}}^2 \approx 0.03\text{–}0.08$ in practice, sample sizing treats unadjusted MDEs as the conservative planning bound and positions **Cohort 2 ($N_2 = 480$)** as the primary target for active-arm contrasts (`Arm 3 vs. Arm 2`, `Arm 4 vs. Arm 2`) under Romano–Wolf FWER control.
+Because pre-treatment survey traits on binary behavioral choices frequently yield $R_{\mathbf{X}}^2 \approx 0.03\text{–}0.08$ in practice, sample sizing treats unadjusted MDEs as the conservative planning bound and positions **Cohort 2 ($N_2 = 240, n = 60/\text{arm}$)** as the conservative upper-bound target for active-arm contrasts (`Arm 3 vs. Arm 2`, `Arm 4 vs. Arm 2`) under Romano–Wolf FWER control.
 
 ### 4.3 Reproducible End-to-End Synthetic Verification (`N=240`, `seed=2026`)
 
@@ -179,7 +179,7 @@ Before estimating treatment effects, we run a pre-registered falsification batte
 
 ### 5.4 Planned Phase 2 Extensions (Post-MVP Roadmap)
 
-The current Phase 1 testbed isolates expressive statutory framing in Arm 4 under identical Stage II KPI displays during evaluation. Two dedicated extensions are strictly reserved for **planned Phase 2** (contingent on Phase 1 empirical findings and powered at Cohort 2, $N_2 = 480$):
+The current Phase 1 testbed isolates expressive statutory framing in Arm 4 under identical Stage II KPI displays during evaluation. Two dedicated extensions are strictly reserved for **planned Phase 2** (contingent on Phase 1 empirical findings and powered at Cohort 2, $N_2 = 240, n = 60/\text{arm}$):
 
 1. **Arm 4a vs. Arm 4b Legal-Incentive Decoupling:** Splits Arm 4 into **`Arm 4a` (Expressive Notice Only, $\mathbb{E}[\text{fine}] = 0$)**—surfacing EU AI Act Arts. 14(4), 26(2), and 99(4)(e) with unchanged financial payoffs—versus **`Arm 4b` (Pecuniary Clawback)**, where penalizing Sara voids the `+300 pt` release and levies a `-50 pt` compliance penalty while absorbing liability awards a `+€1.00` integrity credit. Comparing `Arm 4a` vs. `Arm 4b` cleanly separates normative legal salience from direct financial deterrence.
 2. **Paired-Worker Externality Check:** Replaces scripted subordinate payoffs with a real **paired-worker bonus pool** (Fehr & Schmidt, 1999), where a manager's `Option 1` sanction imposes an actual monetary deduction on a matched participant from a separate worker pool. This tests whether other-regarding fairness preferences attenuate or interact with institutional scapegoating relative to the scripted-agent baseline.

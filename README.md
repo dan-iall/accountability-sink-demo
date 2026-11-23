@@ -19,7 +19,7 @@ This repository serves as the unified public hub for a browser-based, four-arm r
    - [**`FAQ.md`**](FAQ.md) — 12-question reviewer & faculty methodological FAQ covering experimental validity, ergonomics, identification, and deployment.
 
 3. **Reproducible Power Simulation**
-   - [**`analysis/power_simulation.py`**](analysis/power_simulation.py) — Deterministic synthetic cohort generator and conservative $p_1 = 0.50$ MDE calibration for $N = 240$ ($n = 60/\text{arm}$) and $N = 480$ ($n = 120/\text{arm}$).
+   - [**`analysis/power_simulation.py`**](analysis/power_simulation.py) — Deterministic synthetic cohort generator and pilot-calibrated MDE benchmarks for $N_1 = 80\text{–}120$ ($n = 20\text{–}30/\text{arm}$, directional-skew regime) and $N_2 = 240$ ($n = 60/\text{arm}$, conservative $p_1 = 0.50$ bound).
 
 ---
 
