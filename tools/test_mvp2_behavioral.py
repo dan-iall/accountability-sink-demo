@@ -211,35 +211,29 @@ class TestBase64TokenQuarantine(unittest.TestCase):
                 self.assertNotIn("speed=", clean)
 
     def test_reviewer_access_gate_fail_closed_and_enforcement(self):
-        """Verifies Reviewer Access Gate is Fail-Closed in static HTML and halts unauthenticated boot."""
+        """Verifies Reviewer Access Gate modal is removed and direct open entry initializes session without prompt."""
         with open(INDEX_PATH, "r", encoding="utf-8") as f:
             index_content = f.read()
         with open(ADMIN_PATH, "r", encoding="utf-8") as f:
             admin_content = f.read()
 
-        # 1. Assert Fail-Closed static markup (no 'hidden' on reviewerAccessGate)
-        self.assertRegex(index_content, r'<div id="reviewerAccessGate"\s+class="fixed')
-        self.assertRegex(admin_content, r'<div id="reviewerAccessGate"\s+class="fixed')
-        self.assertNotRegex(index_content, r'<div id="reviewerAccessGate"\s+class="hidden')
-        self.assertNotRegex(admin_content, r'<div id="reviewerAccessGate"\s+class="hidden')
+        # 1. Assert #reviewerAccessGate pass-box modal is absent from static markup
+        self.assertNotIn('id="reviewerAccessGate"', index_content)
+        self.assertNotIn('id="reviewerAccessGate"', admin_content)
 
-        # 2. Assert Node VM halts initSession when unauthenticated
+        # 2. Assert Node VM allows initSession directly without ?access token
         node_check = """
-        let gateHidden = false;
-        let isAuth = false;
-        const gateEl = {
-            classList: {
-                remove: (c) => { if (c === 'hidden') gateHidden = false; },
-                add: (c) => { if (c === 'hidden') gateHidden = true; }
-            }
+        let authSet = false;
+        const sessionStorage = {
+            getItem: () => authSet ? '1' : null,
+            setItem: (k, v) => { if (k === 'tum_auth_validated' && v === '1') authSet = true; }
         };
-        const sessionStorage = { getItem: () => null, setItem: () => {} };
-        const window = { location: { search: '' } };
+        const document = { getElementById: () => null };
         function enforceReviewerGate() {
-            const token = new URLSearchParams(window.location.search).get('access');
-            const auth = sessionStorage.getItem('tum_auth_validated') === '1' || token === 'tum2026';
-            if (!auth) { gateEl.classList.remove('hidden'); return false; }
-            gateEl.classList.add('hidden'); return true;
+            sessionStorage.setItem('tum_auth_validated', '1');
+            const gateEl = document.getElementById('reviewerAccessGate');
+            if (gateEl) gateEl.classList.add('hidden');
+            return true;
         }
         let sessionInitialized = false;
         function initSession() {
@@ -247,10 +241,10 @@ class TestBase64TokenQuarantine(unittest.TestCase):
             sessionInitialized = true;
         }
         initSession();
-        console.log('HALTED:' + (!sessionInitialized) + '|GATE_VISIBLE:' + (!gateHidden));
+        console.log('INITIALIZED:' + sessionInitialized + '|AUTH_SET:' + authSet);
         """
         proc = subprocess.run(["node", "-e", node_check], capture_output=True, text=True, check=True)
-        self.assertIn("HALTED:true|GATE_VISIBLE:true", proc.stdout)
+        self.assertIn("INITIALIZED:true|AUTH_SET:true", proc.stdout)
 
 
 class TestMulberry32PRNGAndCohortDeterminism(unittest.TestCase):

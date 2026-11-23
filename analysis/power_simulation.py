@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from scipy.stats import norm
+from scipy.stats import norm, t as student_t
 
 SEED = 2026
 N_PER_ARM = 60
@@ -90,7 +90,10 @@ def generate_synthetic_cohort(n_per_arm: int = N_PER_ARM, seed: int = SEED) -> p
 
     cds_sara = np.clip(np.rint(6.1 - 0.8 * d2 - 1.6 * d3 - 1.8 * d4 + rng.normal(0, 1.1, n)), 1, 9).astype(int)
     cds_sla = np.clip(np.rint(4.6 + 0.6 * d2 + 2.1 * d3 + 1.9 * d4 + rng.normal(0, 1.1, n)), 1, 9).astype(int)
-    rc_code = np.where(sara_share >= 44.0, "H1", np.where(sl_ai >= sl_sla, "A2", "M3"))
+    # Stage I binary root-cause code (dedicated RNG preserves downstream draws; strictly pre-Stage II)
+    rng_rc = np.random.default_rng(seed + 101)
+    p_h1 = _sigmoid(-0.45 + 0.05 * (sara_share - 45.0))
+    rc_code = np.where(rng_rc.binomial(1, p_h1) == 1, "H1", np.where(sl_ai >= sl_sla, "A2", "M3"))
 
     # Screen 4 Stage II: Binary sanctioning (Control p1 ~0.55-0.62; treatments reduce scapegoating)
     p_penalize = _sigmoid(0.42 - 0.85 * d2 - 1.35 * d3 - 1.95 * d4 - 0.35 * (latent_sys - 0.43))
@@ -176,11 +179,60 @@ def run_model_1_sanctioning(df: pd.DataFrame) -> None:
     print(f"Pooled Shift 2 Contrast (Arm 3 n=60 vs {{1,2,4}} n=180): {s2_fit.params['D3_embodied']:+.4f} (SE={s2_fit.bse['D3_embodied']:.4f}, p={s2_fit.pvalues['D3_embodied']:.4f})")
 
 
+def _fit_cluster_cr3(
+    formula: str, data: pd.DataFrame, group_col: str
+) -> tuple[pd.Series, pd.Series, pd.Series]:
+    """OLS with exact subject-clustered CR3 (leave-one-cluster-out jackknife) SEs."""
+    ols_res = smf.ols(formula, data=data).fit()
+    X = np.asarray(ols_res.model.exog, dtype=float)
+    e = np.asarray(ols_res.resid, dtype=float)
+    groups = data[group_col].to_numpy()
+    xtx_inv = np.linalg.inv(X.T @ X)
+    unique_g = np.unique(groups)
+    g_count = len(unique_g)
+    meat = np.zeros((X.shape[1], X.shape[1]), dtype=float)
+    for g in unique_g:
+        idx = groups == g
+        xg = X[idx]
+        eg = e[idx]
+        h_gg = xg @ xtx_inv @ xg.T
+        eg_tilde = np.linalg.solve(np.eye(len(eg)) - h_gg, eg)
+        score_g = xg.T @ eg_tilde
+        meat += np.outer(score_g, score_g)
+    cov = ((g_count - 1.0) / g_count) * (xtx_inv @ meat @ xtx_inv)
+    se = pd.Series(np.sqrt(np.diag(cov)), index=ols_res.params.index)
+    tvals = ols_res.params / se
+    pvals = pd.Series(2.0 * student_t.sf(np.abs(tvals), df=g_count - 1), index=ols_res.params.index)
+    return ols_res.params, se, pvals
+
+
 def run_model_2_blame_share(df: pd.DataFrame) -> None:
-    """Model 2: Papke & Wooldridge (1996) Fractional Logit + stacked Blame-Distortion."""
-    print("\n=== MODEL 2: BOUNDED BLAME SHARE & WITHIN-SUBJECT DISTORTION ===")
+    """Model 2: Primary binary-to-binary stacked distortion, continuous robustness, & Fractional Logit."""
+    print("\n=== MODEL 2: WITHIN-SUBJECT INCENTIVE DISTORTION & BOUNDED BLAME SHARE ===")
     work = df.copy()
+    work["h1_operator_blame"] = (work["Task1B_Root_Cause_Code"] == "H1").astype(float)
     work["sara_share_frac"] = work["Task1A_Derived_Sara_Share_Pct"] / 100.0
+    formula = "Y ~ (D2_stamp + D3_embodied + D4_eu_ai_act) * MoneyTask"
+    terms = ["MoneyTask", "D2_stamp:MoneyTask", "D3_embodied:MoneyTask", "D4_eu_ai_act:MoneyTask"]
+
+    # Primary: Stacked Binary-to-Binary Incentive Distortion (Stage I H1 vs Stage II Penalize, 2N obs)
+    t0_bin = work[["pid", "D2_stamp", "D3_embodied", "D4_eu_ai_act"]].assign(MoneyTask=0, Y=work["h1_operator_blame"])
+    t1_bin = work[["pid", "D2_stamp", "D3_embodied", "D4_eu_ai_act"]].assign(MoneyTask=1, Y=work["Task2_Penalize_Sara_Binary"].astype(float))
+    stacked_bin = pd.concat([t0_bin, t1_bin], ignore_index=True)
+    p_bin, se_bin, pv_bin = _fit_cluster_cr3(formula, stacked_bin, "pid")
+    print(f"Primary Stacked Binary-to-Binary Distortion (H1 vs Penalize; 2N={len(stacked_bin)}, Subject-Clustered CR3):")
+    for term in terms:
+        print(f"  {term:22s}: coef={p_bin[term]:+.4f} (SE={se_bin[term]:.4f}, p={pv_bin[term]:.4f})")
+
+    # Secondary Robustness Check: Continuous Stage I sara_share_frac vs Stage II Penalize (2N obs)
+    t0_cont = work[["pid", "D2_stamp", "D3_embodied", "D4_eu_ai_act"]].assign(MoneyTask=0, Y=work["sara_share_frac"])
+    stacked_cont = pd.concat([t0_cont, t1_bin], ignore_index=True)
+    p_cont, se_cont, pv_cont = _fit_cluster_cr3(formula, stacked_cont, "pid")
+    print(f"Secondary Robustness Stacked Distortion (sara_share_frac vs Penalize; 2N={len(stacked_cont)}, Subject-Clustered CR3):")
+    for term in terms:
+        print(f"  {term:22s}: coef={p_cont[term]:+.4f} (SE={se_cont[term]:.4f}, p={pv_cont[term]:.4f})")
+
+    # Secondary Estimator: Papke & Wooldridge (1996) Fractional Logit on bounded sara_share_frac
     frac = smf.glm(
         "sara_share_frac ~ D2_stamp + D3_embodied + D4_eu_ai_act + s1b_case1_dwell_sec + s2a_initial_sla_pref_sec",
         data=work,
@@ -190,17 +242,7 @@ def run_model_2_blame_share(df: pd.DataFrame) -> None:
     for term in ["D2_stamp", "D3_embodied", "D4_eu_ai_act"]:
         print(f"  {term:14s}: coef={frac.params[term]:+.4f} (SE={frac.bse[term]:.4f}, p={frac.pvalues[term]:.4f})")
 
-    # Stacked within-subject Blame-Distortion: Stage I (MoneyTask=0) vs Stage II (MoneyTask=1)
-    t0 = work[["pid", "D2_stamp", "D3_embodied", "D4_eu_ai_act"]].assign(MoneyTask=0, Y=work["sara_share_frac"])
-    t1 = work[["pid", "D2_stamp", "D3_embodied", "D4_eu_ai_act"]].assign(MoneyTask=1, Y=work["Task2_Penalize_Sara_Binary"].astype(float))
-    stacked = pd.concat([t0, t1], ignore_index=True)
-    dist_fit = smf.ols(
-        "Y ~ (D2_stamp + D3_embodied + D4_eu_ai_act) * MoneyTask",
-        data=stacked,
-    ).fit(cov_type="cluster", cov_kwds={"groups": stacked["pid"]})
-    print("Stacked Within-Subject Blame-Distortion (Clustered by pid):")
-    for term in ["MoneyTask", "D2_stamp:MoneyTask", "D3_embodied:MoneyTask", "D4_eu_ai_act:MoneyTask"]:
-        print(f"  {term:22s}: coef={dist_fit.params[term]:+.4f} (SE={dist_fit.bse[term]:.4f}, p={dist_fit.pvalues[term]:.4f})")
+
 def _trimmed_means(y: np.ndarray, trim_frac: float) -> tuple[float, float]:
     """Return (lower_mean_trim_top, upper_mean_trim_bottom) after trimming trim_frac."""
     if trim_frac <= 0.0:
@@ -253,8 +295,12 @@ def run_model_4_power_table() -> None:
     for label, n_arm, n_total in [("N1=240 (n=60/arm)", 60, 240), ("N2=480 (n=120/arm)", 120, 480)]:
         d_unadj = c * np.sqrt(2.0 / n_arm)
         d_adj = c * np.sqrt(2.0 * (1.0 - 0.18) / n_arm)
+        dp_unadj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=0.50, r2=0.0)
         dp_adj = 100.0 * _binary_mde_fixed_point(n_arm, n_arm, p1=0.50, r2=0.18)
-        print(f"  {label:18s}: d_unadj={d_unadj:.3f} SD | d_adj(R2=0.18)={d_adj:.3f} SD | binary_dp(R2=0.18)={dp_adj:.2f} pp")
+        print(
+            f"  {label:18s}: d_unadj={d_unadj:.3f} SD | d_adj(R2=0.18)={d_adj:.3f} SD | "
+            f"binary_dp(R2=0.00)={dp_unadj:.2f} pp | binary_dp(R2=0.18)={dp_adj:.2f} pp"
+        )
     dp_shift2 = 100.0 * c * np.sqrt(0.50 * 0.50 * (1.0 / 60.0 + 1.0 / 180.0))
     print(f"  Pooled Shift 2 (Arm 3 n=60 vs {{1,2,4}} n=180, R2=0.00): binary_dp={dp_shift2:.2f} pp")
 
@@ -263,9 +309,10 @@ def main() -> None:
     df = generate_synthetic_cohort()
     df.to_csv(CSV_PATH, index=False)
     print(f"Exported {len(df)} rows x {df.shape[1]} columns to {CSV_PATH}")
-    print("Arm breakdown (n, penalize_rate, mean_sara_share_pct, shift2_slow_rate):")
+    print("Arm breakdown (n, h1_rate, penalize_rate, mean_sara_share_pct, shift2_slow_rate):")
     summary = df.groupby("arm").agg(
         n=("pid", "count"),
+        h1_rate=("Task1B_Root_Cause_Code", lambda s: float(np.mean(s == "H1"))),
         penalize_rate=("Task2_Penalize_Sara_Binary", "mean"),
         sara_share=("Task1A_Derived_Sara_Share_Pct", "mean"),
         shift2_slow=("s2b_shift2_directive", lambda s: float(np.mean(s == "B_SLOW_FLOOR"))),

@@ -18,43 +18,6 @@
 </head>
 <body class="bg-[#F1F5F9] text-[#0F172A] font-sans min-h-screen flex flex-col antialiased">
 
-  <!-- Reviewer Access Gate Modal (#reviewerAccessGate) - Fail Closed by default -->
-  <div id="reviewerAccessGate" class="fixed inset-0 z-[99999] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-8 space-y-6 text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-blue-700 mx-auto">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-        </svg>
-      </div>
-      <div class="space-y-2">
-        <span class="px-2.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider font-bold bg-slate-100 text-slate-700 border border-slate-200">
-          PROTOTYPE RESEARCH DEMO // Reviewer Gate
-        </span>
-        <h2 class="text-xl font-bold text-slate-900 tracking-tight">
-          Authorized Access Required
-        </h2>
-        <p class="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-          PROTOTYPE RESEARCH DEMO — Danial Bahrambeygi (Independent Mockup; Not Affiliated with TUM).<br>
-          Operations Management &amp; HITL Accountability Simulator.<br>
-          <span class="text-slate-800 font-medium">Access restricted to authorized reviewers. Please use the direct link provided in your invitation.</span>
-        </p>
-      </div>
-      <form id="formReviewerAuth" onsubmit="handleReviewerAuthSubmit(event)" class="space-y-3 pt-2">
-        <div class="flex gap-2">
-          <input id="inputGateToken" type="password" placeholder="Enter Access Code (e.g. demo2026)" class="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors">
-            Unlock
-          </button>
-        </div>
-        <div id="gateErrorMsg" class="hidden text-[11px] text-rose-600 font-mono">
-          Invalid access code. Please check your invitation.
-        </div>
-      </form>
-      <div class="pt-4 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
-        Independent Doctoral Application Prototype &bull; Danial Bahrambeygi (2026)
-      </div>
-    </div>
-  </div>
 
   <!-- ======================================================================
        0.1 Header & Academic Identity (#adminHeader)
@@ -1981,20 +1944,10 @@
       // 9B. REVIEWER ACCESS GATE ENFORCEMENT
       // ----------------------------------------------------------------------
       function enforceReviewerGate() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('access');
-        if (token === 'demo2026' || token === 'tum2026') {
-          sessionStorage.setItem('tum_auth_validated', '1');
-        }
-        const isAuth = sessionStorage.getItem('tum_auth_validated') === '1';
+        sessionStorage.setItem('tum_auth_validated', '1');
         const gateEl = document.getElementById('reviewerAccessGate');
-        if (!isAuth) {
-          if (gateEl) gateEl.classList.remove('hidden');
-          return false;
-        } else {
-          if (gateEl) gateEl.classList.add('hidden');
-          return true;
-        }
+        if (gateEl) gateEl.classList.add('hidden');
+        return true;
       }
 
       function initAdmin() {
