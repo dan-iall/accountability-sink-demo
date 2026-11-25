@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TUM CIT Research Lab — Milestone 1 Challenger Test Suite
+HITL Accountability Study — Milestone 1 Challenger Test Suite
 Adversarial empirical stress-testing of admin.html:
 1. Mulberry32 PRNG determinism & boundary seeds
 2. Cohort generator stress-testing (N=1, 2, 3, 5, 7, 240, 241, 1000) & balancing
@@ -59,7 +59,7 @@ def build_admin_node_env(extra_js=""):
         setItem: () => {{}}
     }};
     const window = {{
-        location: {{ origin: 'http://localhost', pathname: '/admin.html', search: '?access=tum2026' }}
+        location: {{ origin: 'http://localhost', pathname: '/admin.html', search: '?access=demo2026' }}
     }};
     const dummyEl = {{
         addEventListener: () => {{}},
@@ -302,7 +302,7 @@ class TestBase64TokenQuarantineExtremeCharacters(unittest.TestCase):
         """Verify roundtrip with CJK, Arabic, German umlauts, emojis, and control symbols."""
         extreme_cases = [
             {"pid": "P_測試_123", "meta": "CJK Chinese participant test"},
-            {"pid": "P_äöü_ß_München", "meta": "TUM CIT München Hauptcampus"},
+            {"pid": "P_äöü_ß_Demo", "meta": "European Lab Station Demo"},
             {"pid": "P_🚀_✨_🔬", "meta": "Rocket emoji test 🤖💡"},
             {"pid": "P_تجربة_عربية", "meta": "Arabic RTL script test"},
             {"pid": "P_<script>\"'\\n", "meta": "XSS & escape test: <svg onload=alert(1)> \\\" ' \t \r \n"},
@@ -484,10 +484,10 @@ class TestCsvSchemaConformanceAndLocalStorage(unittest.TestCase):
             arm = int(row[4])
             self.assertIn(arm, [1, 2, 3, 4])
             completion_code = row[51]
-            self.assertTrue(completion_code.startswith("TUM-DONE-"), f"Malformed completion code: {completion_code}")
+            self.assertTrue(completion_code.startswith("STUDY-DONE-"), f"Malformed completion code: {completion_code}")
 
     def test_local_storage_isolation_and_schema_safety(self):
-        """Verify that cohort generation never mutates tum_study_config or creates rogue keys."""
+        """Verify that cohort generation never mutates study_config or creates rogue keys."""
         js = """
         localStorage.clear();
         const initialConfig = JSON.stringify({ customKey: "SAFE_CONFIG_VALUE" });
@@ -501,9 +501,9 @@ class TestCsvSchemaConformanceAndLocalStorage(unittest.TestCase):
         """
         out = run_node(build_admin_node_env(js))
         res = json.loads(out.strip().splitlines()[-1])
-        self.assertTrue(res["configUntouched"], "localStorage['tum_study_config'] was mutated by cohort generator!")
-        self.assertIn("tum_study_sessions", res["keys"])
-        self.assertIn("tum_study_config", res["keys"])
+        self.assertTrue(res["configUntouched"], "localStorage['study_config'] was mutated by cohort generator!")
+        self.assertIn("study_sessions", res["keys"])
+        self.assertIn("study_config", res["keys"])
         self.assertEqual(len(res["keys"]), 2)
 
     def test_csv_cell_escaping_adversarial_injection(self):
@@ -536,7 +536,7 @@ class TestCsvSchemaConformanceAndLocalStorage(unittest.TestCase):
         self.assertEqual(res[8], '0')
 
     def test_corrupted_local_storage_sessions_handling(self):
-        """Demonstrate TypeError if tum_study_sessions contains non-array JSON object."""
+        """Demonstrate TypeError if study_sessions contains non-array JSON object."""
         js = """
         localStorage.setItem(SESSIONS_KEY, JSON.stringify({ corrupted: true }));
         let caughtError = null;
@@ -556,6 +556,6 @@ class TestCsvSchemaConformanceAndLocalStorage(unittest.TestCase):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("TUM CIT RESEARCH LAB — CHALLENGER M1 ADVERSARIAL SUITE")
+    print("HITL ACCOUNTABILITY STUDY — CHALLENGER M1 ADVERSARIAL SUITE")
     print("=" * 60)
     unittest.main(verbosity=2)

@@ -49,7 +49,7 @@ All primary UI regions carry **33 viewport-relative Areas of Interest (`data-aoi
 ├── index.html                          # 4-arm participant testbed & telemetry exporter
 ├── EXPERIMENT_JOURNEY_EXPLORER.html    # 60-second interactive 4-arm journey & payoff explorer
 ├── admin.html                          # Experimenter control room & Base64 config builder
-├── tum_experiment_config.json          # Canonical experiment parameter configuration
+├── experiment_config.json              # Canonical experiment parameter configuration
 ├── css/enterprise_slate.css            # Enterprise light-slate UI & typography styles
 ├── analysis/
 │   ├── power_simulation.py             # Synthetic DGP, primary/robustness estimators & MDEs

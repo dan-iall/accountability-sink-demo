@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TUM CIT Research Lab — M_FINAL Phase 2: Tier 5
+HITL Accountability Study — M_FINAL Phase 2: Tier 5
 White-Box Adversarial Coverage Hardening & Edge-Case Audit Suite
 ================================================================
 Empirically stress-tests edge-case execution paths across index.html and admin.html:
@@ -23,7 +23,7 @@ INDEX_HARNESS = os.path.join(BASE_DIR, "tools", "workflow_challenger_harness.js"
 ADMIN_HARNESS = os.path.join(BASE_DIR, "tools", "admin_vm_harness.js")
 
 
-def run_index_js(js_code, custom_cfg=None, session_overrides=None, search_query="?access=tum2026"):
+def run_index_js(js_code, custom_cfg=None, session_overrides=None, search_query="?access=demo2026"):
     """Executes arbitrary JS inside the audited index.html VM environment."""
     cfg_json = json.dumps(custom_cfg) if custom_cfg is not None else "null"
     sess_json = json.dumps(session_overrides) if session_overrides is not None else "{}"
@@ -161,7 +161,7 @@ class TestParseSessionParamsAndTokenQuarantineWhiteBox(unittest.TestCase):
         code = f"""
         h.sandbox.window.location.search = '?token={token_str}';
         const params = h.context.parseSessionParams();
-        const cachedRaw = h.sandbox.localStorage.getItem('tum_study_config');
+        const cachedRaw = h.sandbox.localStorage.getItem('study_config');
         const cached = cachedRaw ? JSON.parse(cachedRaw) : null;
         return {{
             paramTarget: params.config.bonusTargetPts,
@@ -193,7 +193,7 @@ class TestInitSessionAndStateGuardsWhiteBox(unittest.TestCase):
             "startedAtIso": "2026-11-01T10:00:00.000Z"
         }
         code = f"""
-        h.sandbox.localStorage.setItem('tum_study_sessions', JSON.stringify([{json.dumps(existing_sess)}]));
+        h.sandbox.localStorage.setItem('study_sessions', JSON.stringify([{json.dumps(existing_sess)}]));
         h.sandbox.window.location.search = '?pid=P_SYNC_101&arm=4&speed=3&meta=Updated+Lab+Station';
         h.context.initSession();
         return {{
@@ -429,7 +429,7 @@ class TestMulberry32AndCohortGeneratorWhiteBox(unittest.TestCase):
         ]
         code = """
         const sessions = env.sandbox.window.generateSyntheticSessions(6, 'append', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
         const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
         stored.forEach(s => counts[s.arm]++);
         return {
@@ -437,7 +437,7 @@ class TestMulberry32AndCohortGeneratorWhiteBox(unittest.TestCase):
             counts
         };
         """
-        res = run_admin_js(code, {"tum_study_sessions": json.dumps(pre_existing)})
+        res = run_admin_js(code, {"study_sessions": json.dumps(pre_existing)})
         self.assertEqual(res["totalCount"], 9)
         counts = res["counts"]
         self.assertEqual(counts["1"], 3)

@@ -1,2 +1,6 @@
-# HITL Accountability Simulator MVP2 - Test Suite Dependencies
+# HITL Accountability Simulator MVP2 - Python Dependencies
+numpy>=1.26.0
+pandas>=2.1.0
+scipy>=1.11.0
+statsmodels>=0.14.0
 beautifulsoup4>=4.12.0

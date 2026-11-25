@@ -264,7 +264,7 @@ def test_tab_combination_scenarios():
       sessionStorage: {{ getItem: () => '1', setItem: () => {{}} }},
       localStorage: {{
         getItem: (k) => {{
-          if (k === 'tum_study_sessions') {{
+          if (k === 'study_sessions') {{
             return JSON.stringify([{{
               sessionId: 'LEGACY_TEST',
               pid: 'P_LEGACY',

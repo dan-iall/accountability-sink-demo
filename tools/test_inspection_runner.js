@@ -66,7 +66,7 @@ function runScenario(tabSequence, action = 'QUICK_APPROVE', options = {}) {
       removeItem: function() {}
     },
     sessionStorage: {
-      getItem: function(k) { if (k === 'tum_auth_validated') return '1'; return null; },
+      getItem: function(k) { if (k === 'study_auth_validated') return '1'; return null; },
       setItem: function() {},
       removeItem: function() {}
     },

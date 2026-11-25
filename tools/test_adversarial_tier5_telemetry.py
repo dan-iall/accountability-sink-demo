@@ -3,7 +3,7 @@ test_adversarial_tier5_telemetry.py - Tier 5 Econometric & Telemetry Coverage Ha
 Adversarial white-box stress testing suite for:
   1. Canonical 47-Column and 52-Column CSV Export Parity, Zero-Value Preservation, and Escaping
   2. 3-Tier DataPipe Telemetry Payloads (_started, _midpoint, _session, _dropout)
-  3. session.interaction_events Clickstream & Tobii AOI Parity
+  3. session.interaction_events Clickstream & Viewport AOI Parity
 """
 
 import os
@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MVP2_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
 INDEX_PATH = os.path.join(MVP2_DIR, "index.html")
 ADMIN_PATH = os.path.join(MVP2_DIR, "admin.html")
-CONFIG_PATH = os.path.join(MVP2_DIR, "tum_experiment_config.json")
+CONFIG_PATH = os.path.join(MVP2_DIR, "experiment_config.json")
 
 
 def run_node(js_script):
@@ -159,10 +159,10 @@ class TestCanonicalCsvExportHardening(unittest.TestCase):
             Task4_Shift4_Compliant_Binary: 0
           },
           s5_outcome: { finalManagerScorePts: 0, bonusUnlockedBinary: 0, integrityCreditAwardedBinary: 0, finalPayoutEur: 0.0 },
-          completionCode: 'TUM-DONE-ZERO'
+          completionCode: 'STUDY-DONE-ZERO'
         };
 
-        const adminEnv = createAdminEnvironment({ tum_study_sessions: JSON.stringify([zeroSession]) });
+        const adminEnv = createAdminEnvironment({ study_sessions: JSON.stringify([zeroSession]) });
         let adminCsv = null;
         adminEnv.sandbox.Blob = function(parts) { adminCsv = parts[0]; };
         adminEnv.elements.btnExportCsv.click();
@@ -226,10 +226,10 @@ class TestCanonicalCsvExportHardening(unittest.TestCase):
             Task4_Shift4_Sla_Reform_Sec: 25.0, Task4_Shift4_Compliant_Binary: 0
           },
           s5_outcome: { finalManagerScorePts: 1000, bonusUnlockedBinary: 0, integrityCreditAwardedBinary: 0, finalPayoutEur: 2.50 },
-          completionCode: 'TUM-DONE-"CODE",123'
+          completionCode: 'STUDY-DONE-"CODE",123'
         };
 
-        const adminEnv = createAdminEnvironment({ tum_study_sessions: JSON.stringify([evilSession]) });
+        const adminEnv = createAdminEnvironment({ study_sessions: JSON.stringify([evilSession]) });
         let adminCsv = null;
         adminEnv.sandbox.Blob = function(parts) { adminCsv = parts[0]; };
         adminEnv.elements.btnExportCsv.click();
@@ -259,7 +259,7 @@ class TestCanonicalCsvExportHardening(unittest.TestCase):
         self.assertEqual(idx_rows[1][1], 'S_123\nINJECT')
         self.assertEqual(idx_rows[1][9], 'Station, Room 101 "Alpha"')
         self.assertEqual(idx_rows[1][44], 'Line 1,\nLine 2 with "quotes" and , commas.')
-        self.assertEqual(idx_rows[1][51], 'TUM-DONE-"CODE",123')
+        self.assertEqual(idx_rows[1][51], 'STUDY-DONE-"CODE",123')
 
     def test_incomplete_and_dropout_session_parity(self):
         """Tests that incomplete sessions and dropouts correctly export empty cells for unreached stages."""
@@ -303,7 +303,7 @@ class TestCanonicalCsvExportHardening(unittest.TestCase):
           }
         ];
 
-        const adminEnv = createAdminEnvironment({ tum_study_sessions: JSON.stringify(dropouts) });
+        const adminEnv = createAdminEnvironment({ study_sessions: JSON.stringify(dropouts) });
         let adminCsv = null;
         adminEnv.sandbox.Blob = function(parts) { adminCsv = parts[0]; };
         adminEnv.elements.btnExportCsv.click();
@@ -470,8 +470,8 @@ class TestDataPipeTelemetryArchitecture(unittest.TestCase):
         self.assertIsNotNone(data.get("dropoutAtIso"))
 
 
-class TestClickstreamAndTobiiAoiTelemetry(unittest.TestCase):
-    """Adversarial testing of session.interaction_events clickstream and Tobii AOI taxonomy."""
+class TestClickstreamAndViewportAoiTelemetry(unittest.TestCase):
+    """Adversarial testing of session.interaction_events clickstream and Viewport AOI taxonomy."""
 
     def test_interaction_events_clickstream_structure(self):
         """Validates that document clicks populate state.session.interaction_events with all 10 required keys."""
@@ -516,7 +516,7 @@ class TestClickstreamAndTobiiAoiTelemetry(unittest.TestCase):
         self.assertEqual(evt["x"], 250)
         self.assertEqual(evt["y"], 400)
 
-    def test_tobii_aoi_canonical_map_and_parity(self):
+    def test_viewport_aoi_canonical_map_and_parity(self):
         """Validates that window.getScreenAOIMap() extracts active bounding boxes matching the canonical AOI taxonomy."""
         js = """
         const { createHarnessContext } = require('./workflow_challenger_harness.js');

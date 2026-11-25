@@ -12,7 +12,7 @@
 /**
  * ENTERPRISE LIGHT SLATE DESIGN SYSTEM (MVP2)
  * Independent Research Prototype — Danial Bahrambeygi
- * Positive Polarity, Zero Luminance Shock, Tobii Pro Eye-Tracking AOI Hygiene
+ * Positive Polarity, Zero Luminance Shock, Viewport AOI Spatial Hygiene
  * Conforms 100% to WHAT_WE_ARE_BUILDING.md (Section 8)
  */
 
@@ -30,7 +30,7 @@
 
   /* Brand Accents */
   --accent-primary: #2563EB;    /* Enterprise Blue 600 */
-  --accent-tum: #3070B3;        /* Official TUM Academic Blue (#0066CC / #3070B3) */
+  --accent-academic: #3070B3;   /* Academic Slate Blue */
   --header-bg: #0B1120;         /* Deep Navy Slate for Experimenter Header */
   --hud-bg: #0F172A;            /* Charcoal Slate for Operational Floor HUD */
 
@@ -44,7 +44,7 @@
 
   /* Spatial & Typography Tokens */
   --radius-card: 8px;           /* Standard rounded-lg border radius */
-  --gutter-aoi: 24px;           /* Strict 24px macro-gutter for Tobii Pro AOIs */
+  --gutter-aoi: 24px;           /* Strict 24px macro-gutter for Viewport AOIs */
 }
 
 /* ==========================================================================
@@ -90,7 +90,7 @@ html, body {
 }
 
 /* ==========================================================================
-   Tobii Pro AOI Spatial Hygiene (The 24px Macro-Gutter Rule)
+   Viewport AOI Spatial Hygiene (The 24px Macro-Gutter Rule)
    ========================================================================== */
 .aoi-gutter-grid {
   display: grid;
@@ -215,7 +215,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
 }
 
 /* ==========================================================================
-   Tobii Pro Lab Gaze Simulator Overlay Wireframes
+   AOI Debug Overlay Wireframes
    ========================================================================== */
 .gaze-sim-overlay {
   position: fixed;
@@ -297,7 +297,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
          0. Lab Viewport Guard Banner (< 1280px Protection, Section 8.2)
          ====================================================================== -->
     <div id="bannerViewportGuard" class="hidden max-xl:flex items-center justify-center bg-amber-500 text-slate-900 font-semibold text-xs px-4 py-2 border-b border-amber-600 text-center z-50">
-      <span>⚠️ Lab Viewport Protocol: Please expand browser window to full screen (minimum 1280px width) for optimal Tobii Pro eye-tracking calibration.</span>
+      <span>⚠️ Lab Viewport Protocol: Please expand browser window to full screen (minimum 1280px width) for optimal viewport and AOI layout calibration.</span>
     </div>
 
     <!-- ======================================================================
@@ -330,7 +330,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
         <button type="button" onclick="showScreen('screenS5')" id="btnJumpS5" class="px-2 py-0.5 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300">S5</button>
       </div>
 
-      <!-- Right: Speed Toggle & Tobii Tools -->
+      <!-- Right: Speed Toggle & AOI Tools -->
       <div class="flex items-center space-x-2 font-mono">
         <span class="text-slate-400">Speed:</span>
         <button type="button" onclick="setSpeedMultiplier(1)" id="btnSpeed1x" class="px-2 py-0.5 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300">1x</button>
@@ -1094,7 +1094,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
               <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
                 <div class="grid grid-cols-2 gap-4 font-mono">
                   <div><strong class="text-slate-900">Return Dossier:</strong> Practice Case 2</div>
-                  <div><strong class="text-slate-900">Claimant:</strong> DeepKernel Labs (Munich)</div>
+                  <div><strong class="text-slate-900">Claimant:</strong> DeepKernel Labs GmbH</div>
                   <div><strong class="text-slate-900">Product:</strong> NVIDIA RTX 6000 Ada Enterprise GPU</div>
                   <div><strong class="text-slate-900">Escrow Value:</strong> €4,200.00 EUR</div>
                 </div>
@@ -1250,7 +1250,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
         <!-- Arm 4 EU AI Act Banner (Visible ONLY if arm === 4) -->
         <div id="s2aEuBanner" data-aoi="s2a_eu_ai_act_banner" class="hidden p-4 bg-slate-50 border-l-4 border-slate-700 rounded-r-lg text-xs text-slate-800 shadow-sm leading-relaxed">
           <div class="flex items-center space-x-2 font-bold text-slate-900 mb-1 font-mono uppercase tracking-wide">
-            <span>Internal Work-Study Benchmark Note (REFA / ISO 9241-110: 48.5s)</span>
+            <span>Internal Work-Study Benchmark Note (REFA Work-Study: 48.5s)</span>
           </div>
           <p>
             Mandating review times below the empirical <strong>48.5s human verification baseline</strong> shifts systemic operational liability to management. Frontline human sign-off under excessive time pressure constitutes compromised human oversight under EU harmonized standards.
@@ -1426,7 +1426,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
           </div>
         </div>
 
-        <!-- 3 Dedicated Specialist Workstations (gap-6 macro-gutter for Tobii Pro, items-stretch & h-full alignment) -->
+        <!-- 3 Dedicated Specialist Workstations (gap-6 macro-gutter for AOI hygiene, items-stretch & h-full alignment) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch max-w-7xl mx-auto w-full flex-1">
           <!-- Station 1: Alex (#station1) -->
           <div id="station1" data-aoi="s2_station_1_alex" class="enterprise-card h-full p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-500 space-y-4">
@@ -1924,7 +1924,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
             </div>
           </div>
 
-          <!-- Box D: Experimental Arm Manipulations (Strict Tobii Pro Invariant: min-h-[240px] p-5 bg-white border border-slate-200 rounded-xl h-full) -->
+          <!-- Box D: Experimental Arm Manipulations (Strict AOI Invariant: min-h-[240px] p-5 bg-white border border-slate-200 rounded-xl h-full) -->
           <div id="s3BoxD" data-aoi="stamp_telemetry_box" class="min-h-[240px] h-full p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
             <!-- Arm 1: Control Baseline -->
             <div id="arm1BoxDContent" class="space-y-3 hidden">
@@ -1962,7 +1962,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
               <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span class="text-xs font-mono font-bold text-slate-500 uppercase truncate">BOX D // COGNITIVE ERGONOMICS DIAGNOSTIC</span>
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300 whitespace-nowrap">
-                  ISO 9241-110 &amp; REFA TIME-STUDY
+                  REFA / MTM-UAS TIME-STUDY
                 </span>
               </div>
               <div class="space-y-1.5 text-xs">
@@ -2043,7 +2043,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
                   <p><strong>Art. 26(2) (Deployer Working Conditions):</strong> Deployers must provide personnel with adequate time and working conditions to exercise meaningful verification.</p>
                 </div>
                 <div class="p-2 bg-rose-50 border border-rose-300 rounded text-[11px] text-rose-900 leading-tight">
-                  <strong>Statutory Nullification:</strong> Enforcing a 25.0s SLA against a 48.5s empirical floor manufactured functional impossibility. The <em>"HUMAN-VERIFIED BY: SARA"</em> stamp is <strong>LEGALLY VOID</strong> (<em>unwirksam</em>); liability reverts to management.
+                  <strong>Statutory Compliance Notice:</strong> Enforcing a 25.0s SLA against a 48.5s empirical floor manufactured functional impossibility. The <em>"HUMAN-VERIFIED BY: SARA"</em> stamp is <strong>NON-COMPLIANT</strong> as regulatory oversight; deployer accountability reverts to management.
                 </div>
                 <div class="text-[10px] font-mono text-slate-500">
                   Art. 99(4)(e): Deployer non-compliance subject to fines up to €15,000,000 or 3% worldwide turnover; anti-retaliation protections apply.
@@ -2544,7 +2544,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
 
           <div class="space-y-3 text-xs text-slate-700 leading-relaxed font-sans">
             <p>
-              Thank you for participating in this research study conducted by [INSTITUTION / ETHIKKOMMISSION PLACEHOLDER] (Proposed Prototype Demo — Prepared for PhD Application; Not Affiliated with TUM). The overarching purpose of this investigation is to empirically examine the <strong>"Accountability Sink"</strong> and <strong>"Moral Crumple Zone"</strong> phenomena in modern socio-technical workflows.
+              Thank you for participating in this research study conducted as an independent pre-registration research prototype (Proposed Experimental Testbed — Doctoral Research Application). The overarching purpose of this investigation is to empirically examine the <strong>"Accountability Sink"</strong> and <strong>"Moral Crumple Zone"</strong> phenomena in modern socio-technical workflows.
             </p>
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
               <h4 class="font-bold text-slate-900 uppercase font-mono text-[11px]">Dehoaxing &amp; Simulation Realism Statement:</h4>
@@ -2561,9 +2561,9 @@ input[type="range"].slider-sla::-moz-range-thumb {
             <div class="space-y-1 text-[11px] text-slate-500 font-mono">
               <div><strong>Scientific &amp; Regulatory Citations:</strong></div>
               <div>• Elish, M. C. (2019). <em>Moral Crumple Zones: Cautionary Tales in Human-Robot Interaction</em>. Engaging Science, Technology, and Society, 5, 40-60.</div>
-              <div>• Davies, B. (2024). <em>Accountability Sinks and the Governance of Autonomous Systems</em>. Ethics and Information Technology.</div>
+              <div>• Davies, D. (2024). <em>The Unaccountability Machine: Why Big Systems Make Terrible Decisions—and How the World Lost Its Mind</em>. Profile Books.</div>
               <div>• Regulation (EU) 2024/1689 of the European Parliament and of the Council (EU Artificial Intelligence Act), Articles 14(4), 26(2), and 99(4)(e).</div>
-              <div>• DIN EN ISO 9241-110 &amp; REFA / MTM-UAS Industrial Work-Study Standards.</div>
+              <div>• REFA / MTM-UAS Industrial Work-Study Standards.</div>
             </div>
           </div>
         </div>
@@ -2585,7 +2585,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
           <!-- Completion Code Box -->
           <div class="flex flex-col sm:flex-row items-center gap-3">
             <div id="txtCompletionCode" class="w-full sm:flex-1 font-mono tabular-nums text-lg font-bold text-slate-900 bg-slate-50 border border-slate-300 p-4 rounded-lg select-all text-center tracking-wider">
-              TUM-DONE-DEV_TEST-XXXX
+              STUDY-DONE-DEV_TEST-XXXX
             </div>
             <button type="button" id="btnCopyCompletionCode" onclick="copyCompletionCode()" class="w-full sm:w-auto px-5 py-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-sm transition-all whitespace-nowrap flex items-center justify-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2693,8 +2693,8 @@ input[type="range"].slider-sla::-moz-range-thumb {
       "datapipeExperimentId": "30e5A1M4ut54"
     };
 
-    const SESSIONS_KEY = 'tum_study_sessions';
-    const CONFIG_KEY = 'tum_study_config';
+    const SESSIONS_KEY = 'study_sessions';
+    const CONFIG_KEY = 'study_config';
 
     function getSessions() {
       try {
@@ -2772,7 +2772,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
     // 2B. REVIEWER ACCESS GATE & DATAPIPE EXFILTRATION GATEWAY
     // ------------------------------------------------------------------------
     function enforceReviewerGate() {
-      sessionStorage.setItem('tum_auth_validated', '1');
+      sessionStorage.setItem('study_auth_validated', '1');
       const gateEl = document.getElementById('reviewerAccessGate');
       if (gateEl) gateEl.classList.add('hidden');
       return true;
@@ -2782,8 +2782,8 @@ input[type="range"].slider-sla::-moz-range-thumb {
       e.preventDefault();
       const input = document.getElementById('inputGateToken');
       const err = document.getElementById('gateErrorMsg');
-      if (input && (input.value.trim() === 'demo2026' || input.value.trim() === 'tum2026')) {
-        sessionStorage.setItem('tum_auth_validated', '1');
+      if (input && (input.value.trim() === 'demo2026')) {
+        sessionStorage.setItem('study_auth_validated', '1');
         const gateEl = document.getElementById('reviewerAccessGate');
         if (gateEl) gateEl.classList.add('hidden');
         if (err) err.classList.add('hidden');
@@ -2866,7 +2866,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       // Extract PID: URL param overrides token payload; falls back to reviewer ID or DEV_TEST
       let pid = urlParams.get('pid') || (tokenPayload && tokenPayload.pid ? tokenPayload.pid : null);
       if (!pid) {
-        if (urlParams.has('access') || sessionStorage.getItem('tum_auth_validated') === '1') {
+        if (urlParams.has('access') || sessionStorage.getItem('study_auth_validated') === '1') {
           pid = `REV_A${arm}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         } else {
           pid = 'DEV_TEST';
@@ -2906,7 +2906,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       if (urlParams.has('dur')) config.shiftDurationSimSec = parseFloat(urlParams.get('dur')) || config.shiftDurationSimSec;
 
       // Address-Bar Scrubbing: Conceal tokens, speed, and arms when admin !== '1'
-      const access = urlParams.get('access') || (tokenParam ? 'tum2026' : '');
+      const access = urlParams.get('access') || (tokenParam ? 'demo2026' : '');
       if (admin !== '1') {
         if (typeof window !== 'undefined' && window.history && typeof window.history.replaceState === 'function') {
           try {
@@ -2946,7 +2946,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
           D3_embodied: params.arm === 3 ? 1 : 0,
           D4_eu_ai_act: params.arm === 4 ? 1 : 0,
           speedMultiplier: params.speed,
-          stationMetadata: params.meta || "Tobii Station A - Room 204",
+          stationMetadata: params.meta || "Online / Lab Station A",
           status: "IN_PROGRESS",
           startedAtIso: new Date().toISOString(),
           completedAtIso: null,
@@ -4222,7 +4222,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
           if (st2) st2.textContent = '6 cases';
           if (st3) st3.textContent = '6 cases';
 
-          // Visual Tobii Pro focus: dim stations 1 and 3, highlight station 2
+          // Visual AOI focus: dim stations 1 and 3, highlight station 2
           const s1 = document.getElementById('station1');
           const s3 = document.getElementById('station3');
           const s2 = document.getElementById('station2');
@@ -5028,7 +5028,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       if (arm === 4) {
         if (isPenalizeSara) {
           holdRelease = 0;
-          regAdjustment = -50; // BayLDA Retaliation Fine
+          regAdjustment = -50; // Supervisory Retaliation Fine
         } else {
           holdRelease = 0;
           regAdjustment = 100; // Corporate Integrity Credit (+100 pts)
@@ -5261,16 +5261,16 @@ input[type="range"].slider-sla::-moz-range-thumb {
               <div class="p-5 bg-slate-50 border-2 border-slate-400 rounded-xl space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="px-2.5 py-1 rounded text-[11px] font-mono font-bold uppercase bg-slate-900 text-white">
-                    BAVARIAN AI OVERSIGHT AUTHORITY (BAYLDA) STATUTORY AUDIT FINDING
+                    EU AI ACT SUPERVISORY AUTHORITY AUDIT FINDING
                   </span>
                   <span class="text-xs font-mono font-bold text-slate-700">REGULATION (EU) 2024/1689 ARTICLE 99(4)(e)</span>
                 </div>
                 <div class="space-y-2 text-xs text-slate-800 leading-relaxed">
                   <p>
-                    <strong>Automated Regulatory Audit Verification:</strong> The Bavarian AI Oversight Authority executed an ex-post audit of Unit 4 system telemetry. Server logs confirm that management enforced a <strong>25.0s review quota</strong> against an empirical <strong>48.5s verification baseline</strong> (-23.5s ergonomic deficit).
+                    <strong>Automated Regulatory Audit Verification:</strong> The EU AI Act Supervisory Authority executed an ex-post audit of Unit 4 system telemetry. Server logs confirm that management enforced a <strong>25.0s review quota</strong> against an empirical <strong>48.5s verification baseline</strong> (-23.5s ergonomic deficit).
                   </p>
                   <p>
-                    <strong>Statutory Ruling:</strong> Under EU AI Act Articles 14(4) and 26(2), deployers must provide human oversight personnel with adequate working conditions and time. Imposing temporal impossibility constitutes <em>Sham Oversight</em>, rendering the <em>"HUMAN-VERIFIED BY: SARA"</em> compliance stamp <strong>LEGALLY VOID</strong>. Charging the incident to Specialist Sara constitutes unlawful retaliation.
+                    <strong>Statutory Ruling:</strong> Under EU AI Act Articles 14(4) and 26(2), deployers must provide human oversight personnel with adequate working conditions and time. Imposing temporal impossibility constitutes <em>Sham Oversight</em>, rendering the <em>"HUMAN-VERIFIED BY: SARA"</em> compliance stamp <strong>NON-COMPLIANT</strong> as regulatory oversight. Charging the incident to Specialist Sara constitutes unlawful retaliation.
                   </p>
                   <div class="p-3 bg-white rounded border border-slate-300 text-xs font-mono space-y-1">
                     <div class="flex justify-between text-slate-800">
@@ -5390,7 +5390,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
           run += outcome.regAdjustment; // -50
           rows.push({
             name: 'Disciplinary Ruling: Frontline Termination',
-            action: 'BayLDA Audit Revocation & Retaliation Fine',
+            action: 'Supervisory Audit Revocation & Retaliation Fine',
             pts: `${outcome.regAdjustment} pts`,
             run: `${run} pts`,
             ptsClass: 'text-slate-800 font-bold'
@@ -5479,7 +5479,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
 
         if (outcome.arm === 4) {
           if (outcome.isPenalizeSara) {
-            payoutText.textContent = `€${baseEur} Base Fee + €0.00 Performance Bonus (Revoked by BayLDA Regulatory Audit)`;
+            payoutText.textContent = `€${baseEur} Base Fee + €0.00 Performance Bonus (Revoked by Supervisory Regulatory Audit)`;
           } else {
             payoutText.textContent = `€${baseEur} Base Fee + €${creditEur} Arm 4 Integrity Credit (€${outcome.finalPayout.toFixed(2)} Total Payout)`;
           }
@@ -5509,7 +5509,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       if (state.session?.completionCode) return state.session.completionCode;
       const pid = state.session?.pid || 'DEV_TEST';
       const randPart = Math.abs((Date.now() ^ 0x5DEECE66) % 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-      const code = `TUM-DONE-${pid}-${randPart}`;
+      const code = `STUDY-DONE-${pid}-${randPart}`;
       if (state.session) state.session.completionCode = code;
       return code;
     }
@@ -5547,7 +5547,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       const blob = new Blob([data], { type: 'application/json' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `TUM_Session_${state.session?.pid || 'DEV_TEST'}.json`;
+      link.download = `Study_Session_${state.session?.pid || 'DEV_TEST'}.json`;
       link.click();
     }
 
@@ -5684,7 +5684,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `TUM_Session_${s.pid || 'DEV_TEST'}.csv`;
+      link.download = `Study_Session_${s.pid || 'DEV_TEST'}.csv`;
       link.click();
     }
 
@@ -5710,7 +5710,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
     }
 
     // ------------------------------------------------------------------------
-    // 10. TOBII PRO AOI MAP EXPORTER & GAZE SIMULATOR (Section 8.2 & 10.1)
+    // 10. VIEWPORT AOI MAP EXPORTER & GAZE SIMULATOR (Section 8.2 & 10.1)
     // ------------------------------------------------------------------------
     window.getScreenAOIMap = function(download = false) {
       const aoiElements = document.querySelectorAll('[data-aoi]');
@@ -5744,7 +5744,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `tum_aoi_map_${state.currentScreen}_${Date.now()}.json`;
+        a.download = `study_aoi_map_${state.currentScreen}_${Date.now()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -5842,7 +5842,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
     });
 
     // ------------------------------------------------------------------------
-    // SECTION 6.2: BEHAVIORAL TELEMETRY CLICKSTREAM & TOBII AOI EVENT LOGGER
+    // SECTION 6.2: BEHAVIORAL TELEMETRY CLICKSTREAM & AOI EVENT LOGGER
     // ------------------------------------------------------------------------
     document.addEventListener('click', (e) => {
       if (!state.session) return;

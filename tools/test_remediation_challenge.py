@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TUM CIT Research Lab — Milestone 3 Iteration 2
+HITL Accountability Study — Milestone 3 Iteration 2
 Comprehensive Empirical Adversarial Remediation Challenge Suite
 ================================================================
 Empirically verifies:

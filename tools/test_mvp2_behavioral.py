@@ -20,7 +20,7 @@ from urllib.parse import quote, unquote
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX_PATH = os.path.join(BASE_DIR, "index.html")
 ADMIN_PATH = os.path.join(BASE_DIR, "admin.html")
-CONFIG_PATH = os.path.join(BASE_DIR, "tum_experiment_config.json")
+CONFIG_PATH = os.path.join(BASE_DIR, "experiment_config.json")
 CSS_PATH = os.path.join(BASE_DIR, "css", "enterprise_slate.css")
 
 
@@ -116,7 +116,7 @@ class TestBase64TokenQuarantine(unittest.TestCase):
                 "pid": "P_PILOT_002",
                 "arm": 4,
                 "speed": 3,
-                "meta": "München Lab Trial — €4.00 Bonus [Station 4]",
+                "meta": "Lab Trial — €4.00 Bonus [Station 4]",
                 "config": {**self.default_config, "targetCohortN": 300, "bonusTargetPts": 1400}
             },
             {
@@ -188,14 +188,14 @@ class TestBase64TokenQuarantine(unittest.TestCase):
         node_code = """
         let replacedUrl = null;
         const window = {
-            location: { pathname: '/mvp2/index.html', search: '?access=tum2026&token=ENCODED_TOKEN_PAYLOAD&speed=3' },
+            location: { pathname: '/mvp2/index.html', search: '?access=demo2026&token=ENCODED_TOKEN_PAYLOAD&speed=3' },
             history: {
                 replaceState: (state, title, url) => { replacedUrl = url; }
             }
         };
         // Simulated scrubbing function
         const tokenParam = 'ENCODED_TOKEN_PAYLOAD';
-        const access = 'tum2026';
+        const access = 'demo2026';
         const isAdmin = false;
         if (!isAdmin) {
             window.history.replaceState({}, '', window.location.pathname + (tokenParam ? '?access=' + access : ''));
@@ -206,7 +206,7 @@ class TestBase64TokenQuarantine(unittest.TestCase):
         for line in proc.stdout.splitlines():
             if line.startswith("__CLEAN_URL__:"):
                 clean = line[len("__CLEAN_URL__:"):].strip()
-                self.assertEqual(clean, "/mvp2/index.html?access=tum2026")
+                self.assertEqual(clean, "/mvp2/index.html?access=demo2026")
                 self.assertNotIn("token=", clean)
                 self.assertNotIn("speed=", clean)
 
@@ -226,11 +226,11 @@ class TestBase64TokenQuarantine(unittest.TestCase):
         let authSet = false;
         const sessionStorage = {
             getItem: () => authSet ? '1' : null,
-            setItem: (k, v) => { if (k === 'tum_auth_validated' && v === '1') authSet = true; }
+            setItem: (k, v) => { if (k === 'study_auth_validated' && v === '1') authSet = true; }
         };
         const document = { getElementById: () => null };
         function enforceReviewerGate() {
-            sessionStorage.setItem('tum_auth_validated', '1');
+            sessionStorage.setItem('study_auth_validated', '1');
             const gateEl = document.getElementById('reviewerAccessGate');
             if (gateEl) gateEl.classList.add('hidden');
             return true;

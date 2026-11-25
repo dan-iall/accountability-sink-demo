@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TUM CIT Research Lab — Milestone 3 Empirical Challenger Test Suite
+HITL Accountability Study — Milestone 3 Empirical Challenger Test Suite
 Adversarially tests core experimental workflows and decision logic in index.html:
 1. S1 Navigation & Dwell Accumulation (rapid back/forth Steps 2-6, additive dwell, Arm 3 step 6 restriction)
 2. S1B Practice Case 2 Tab combinations matrix crossed with Quick Approve vs Escalate

@@ -155,7 +155,7 @@ function createHarnessContext(initialTime = 1000000) {
       removeItem: function(k) { delete this.store[k]; }
     },
     sessionStorage: {
-      store: { 'tum_auth_validated': '1' },
+      store: { 'study_auth_validated': '1' },
       getItem: function(k) { return this.store[k] !== undefined ? this.store[k] : null; },
       setItem: function(k, v) { this.store[k] = String(v); }
     },

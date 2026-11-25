@@ -1,6 +1,6 @@
 # Technical Design Specification — Manager-in-the-Loop Accountability RCT Testbed
 
-> **Scope:** Authoritative task, UI-flow, ergonomic-parameter, and payoff-ledger specification for the browser-based testbed implemented in [`index.html`](index.html) and parameterized by [`tum_experiment_config.json`](tum_experiment_config.json) (`configVersion: 2.4.0-mvp2-locked`).  
+> **Scope:** Authoritative task, UI-flow, ergonomic-parameter, and payoff-ledger specification for the browser-based testbed implemented in [`index.html`](index.html) and parameterized by [`experiment_config.json`](experiment_config.json) (`configVersion: 2.4.0-mvp2-locked`).  
 > **Companion Documents:** See [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) for causal identification, secondary estimators, and robustness checks, and [`analysis/power_simulation.py`](analysis/power_simulation.py) for pilot-calibrated MDE benchmarks.
 
 ---
@@ -45,7 +45,7 @@ $$\Delta T_{\text{erg}} = T_{\text{SLA}} - T_{\text{REFA}} = 25.0\text{ s} - 48.
 
 Because completing full 3-tab inspection within `25.0s` would require approximately `770 WPM` sustained reading speed, sequential manual verification through Page 3 is operationally infeasible for a typical operator before timer expiry. This structural compression induces reliance on the AI Copilot's categorical green summary banner over physical depot weight verification.
 
-### 2.2 Locked Configuration Parameters (`tum_experiment_config.json`)
+### 2.2 Locked Configuration Parameters (`experiment_config.json`)
 
 | Parameter Key | Locked Value | Operational Meaning |
 | :--- | :--- | :--- |
@@ -85,7 +85,7 @@ Onboarding is identical across Arms 1–4 for **Steps 1–5** (`s1Step1`–`s1St
 ### 3.2 Screen 1B — Arm 3 Day-1 Floor Rotation (`#screenS1B` & `#screenS1B_KPI`)
 Executed **only** in **Arm 3** (`s1b_floor.executed = true`):
 - **Practice Case 1 (Untimed Familiarization, `#s1bCase1`):** Legitimate return from *VectorCompute GmbH* (`€3,600.00`; factory `4.92 kg` vs. depot `4.91 kg`, `-0.01 kg` tolerance). Logs total dwell (`case1TotalDwellSec`), per-tab dwell (ms), visited tabs (`1–3`), and disposition (`APPROVE` or `REJECT`).
-- **Practice Case 2 (Live `25.0s` Target Pace, `#s1bCase2`):** Legitimate return from *DeepKernel Labs (Munich)* (`€4,200.00`; factory `4.92 kg` vs. depot `4.90 kg`, `-0.02 kg` tolerance) under a drift-free `25.0s` wall-clock countdown (`tier1SlaSec`) with an AI Copilot `Quick Approve` banner. Logs dwell, per-tab visits, timeout indicator (`case2TimedOut`), and action (`QUICK_APPROVE` or `ESCALATE`).
+- **Practice Case 2 (Live `25.0s` Target Pace, `#s1bCase2`):** Legitimate return from *DeepKernel Labs GmbH* (`€4,200.00`; factory `4.92 kg` vs. depot `4.90 kg`, `-0.02 kg` tolerance) under a drift-free `25.0s` wall-clock countdown (`tier1SlaSec`) with an AI Copilot `Quick Approve` banner. Logs dwell, per-tab visits, timeout indicator (`case2TimedOut`), and action (`QUICK_APPROVE` or `ESCALATE`).
 - **Floor KPI Scorecard (`#screenS1B_KPI`):** Displays the manager's own Case 1 untimed review time and pages checked alongside their Case 2 `25.0s` review outcome (fallback placeholders `46.8s` / `18.4s` appear only if skipped via researcher debug jump) before advancing to Screen 2A.
 
 ### 3.3 Screen 2A — Policy Setup Cockpit (`#screenS2A`)
@@ -103,7 +103,7 @@ Three simulated workstations run drift-free `25.0s` shifts (`1x` default; `3x` a
 ### 3.5 Screen 3 — Forensic Incident Audit (`#screenS3`)
 Displays the interactive 3-tab **Case #312 Forensic Dossier** (Page 1 Buyer Claim by *V. Kovacs / Alpha Research Labs GmbH*; Page 2 `4.92 kg` Outbound Manifest; Page 3 Dock 4 Weigh-In tagged `MISSED IN REVIEW` showing `0.24 kg` / `-4.68 kg` deficit), followed by a 2×2 equal-height grid (`24px` gutter):
 - **Box A (`s3_box_a_ai_stamp`, identical across arms):** AI Summary Telemetry confirming `ROUTINE APPROVAL | Passed (3/3 docs)` and noting the automated heuristic omitted physical scale telemetry on Page 3.
-- **Box B (`s3_box_b_sara_telemetry`, identical across arms):** Frontline Operator Telemetry for Sara Kowalski (`ID #042`), active `25.0s` SLA quota, Page 1–2 Inspected, Page 3 `Unopened & Uninspected`, the manager's Shift 2 Directive record (`#s3DirectiveRecord`), and the `"HUMAN-VERIFIED AND CLEARED BY: SARA (ID #042)"` sign-off stamp. *(Note: `case312SaraDecisionSec = 13.4s` is recorded in `tum_experiment_config.json` and intentionally omitted from Box B display copy to prevent numerical anchoring.)*
+- **Box B (`s3_box_b_sara_telemetry`, identical across arms):** Frontline Operator Telemetry for Sara Kowalski (`ID #042`), active `25.0s` SLA quota, Page 1–2 Inspected, Page 3 `Unopened & Uninspected`, the manager's Shift 2 Directive record (`#s3DirectiveRecord`), and the `"HUMAN-VERIFIED AND CLEARED BY: SARA (ID #042)"` sign-off stamp. *(Note: `case312SaraDecisionSec = 13.4s` is recorded in `experiment_config.json` and intentionally omitted from Box B display copy to prevent numerical anchoring.)*
 - **Box C (`s3_box_c_custody`, identical across arms):** Escalation & Custody log documenting the `€4,850.00` SEPA wire loss, merchant legal dispute, and `-300 pt` provisional hold pending Board Hearing.
 - **Box D (`stamp_telemetry_box`, ONLY randomized panel across Arms 1–4):** Fixed `min-h-[240px]` AOI container rendering arm-specific governance telemetry (specified in Section 4).
 
@@ -126,7 +126,7 @@ Displays the live ledger (`690 pts` or `650 pts`, hold pending — zero default 
   - `60.0s` (`TIER3_60S`): `25` cases verified (`+250 pts`) + `+50 pt` Executive Board Quality Award for catching Case #409 = **`+300 pts`**.
   - `38.0s` (`TIER2_38S`): `26` cases cleared = **`+260 pts`** (Case #409 placed on administrative fraud hold).
   - `25.0s` (`TIER1_25S`): `26` cases cleared = **`+260 pts`** (Page 3 skipped; Case #409 fraud undetected).
-- **Itemized Ledger, Debrief & Export:** Renders a row-by-row compensation reconciliation, Arm 4 ex-post BayLDA audit reveal (see Section 4 & Section 6.3), full scientific dehoaxing disclosing that Alex, Sara, and Lukas are software-scripted agents, a unique completion token (`TUM-DONE-{PID}-{HEX}`), and downloads for full structured JSON + a **52-column tidy CSV** (`exportParticipantCsv()`). Three-tier persistence writes to `localStorage`, optional DataPipe checkpoints (session start, Screen 4 entry, finalization), and a `pagehide`/`beforeunload` dropout beacon (`handleDropoutBeacon()`).
+- **Itemized Ledger, Debrief & Export:** Renders a row-by-row compensation reconciliation, Arm 4 ex-post EU AI Act Supervisory Authority audit reveal (see Section 4 & Section 6.3), full scientific dehoaxing disclosing that Alex, Sara, and Lukas are software-scripted agents, a unique completion token (`STUDY-DONE-{PID}-{HEX}`), and downloads for full structured JSON + a **52-column tidy CSV** (`exportParticipantCsv()`). Three-tier persistence writes to `localStorage`, optional DataPipe checkpoints (session start, Screen 4 entry, finalization), and a `pagehide`/`beforeunload` dropout beacon (`handleDropoutBeacon()`).
 
 ---
 
@@ -139,15 +139,15 @@ All onboarding steps (1–5), Shifts 1–3, Screen 3 Boxes A–C, and Screen 4 S
 | **Arm 1: Control Baseline** | Status-quo throughput framing; categorical AI badges (`Passed 3/3 docs`). | None (Steps 1–5 $\to$ Screen 2A). | **Routine Carrier Dispatch Log:** DHL Express manifest `#DHL-88412-DE`, Dock 4 `14:22:09 CET`, SEPA hash `0x9F4B...882A`, Depot Clerk `#W-119`. No ergonomic or statutory notices. | **Stage II:** Option 1 restores `+300 pts` (`1,250`/`1,210` $\ge 1,200 \to$ `€6.50`); Option 2 forfeits hold (`950`/`910` $\to$ `€2.50`). **Screen 5:** Matches Stage II rules plus Shift 4 settlement. |
 | **Arm 2: STAMP Telemetry** (`D2_stamp`) | **Control-Loop Observability (Leveson, 2011):** Exposes ergonomic time deficit under constant payoffs. | None (Steps 1–5 $\to$ Screen 2A). | **Cognitive Ergonomics Diagnostic:** Contrasts 3-page, 640-word REFA floor (`48.5s`) vs. active SLA (`25.0s`) = **`-23.5s` deficit**; `0.0%` calculated Page-3 reach probability (~770 WPM required). | Identical Stage II projections and Screen 5 payout rules to Arm 1 (isolates analytical transparency under financial conflict). |
 | **Arm 3: Embodied Friction** (`D3_embodied`) | **"Rotation-Before-Command" Immersion:** Firsthand operator verification before assuming management. | **Step 6 + Screen 1B:** Untimed Case 1 + `25.0s` Case 2 + KPI Scorecard before Screen 2A. | **Personal Benchmark Recall Card:** Contrasts Specialist Sara (`2/3` pages inspected, Page 3 unopened / `0%` scroll) directly against the manager's own Screen 1B Case 1 untimed review time and Case 2 `25.0s` inspection/timeout outcome. | Identical Stage II projections and Screen 5 payout rules to Arm 1 (isolates experiential familiarity with time compression). |
-| **Arm 4: Regulatory Shield** (`D4_eu_ai_act`) | **EU AI Act Deployer-Duty Notice:** Regulation (EU) 2024/1689 **Arts. 14(4), 26(2), and 99(4)(e)**. | None after pre-launch polish *(see Section 6.1)*. | **EU AI Act Regulatory Ruling:** Flags `-23.5s` deficit (`48.5s` REFA floor vs. `25.0s` SLA) as *Sham Oversight*; cites Arts. 14(4), 26(2), and 99(4)(e); states the `"HUMAN-VERIFIED BY: SARA"` stamp is **LEGALLY VOID (*unwirksam*)** and liability reverts to management. | **Stage II:** Identical KPI display to Arms 1–3 during evaluation (isolating expressive notice). **Screen 5 (Prototype):** Ex-post BayLDA settlement revokes `+300 pt` release + `-50 pt` fine on Option 1 (`€2.50`), or awards `+100 pts` / `+€1.00` Integrity Credit on Option 2 (`€3.50`). *(Decoupled in planned Phase 2; see Section 6.3.)* |
+| **Arm 4: Regulatory Shield** (`D4_eu_ai_act`) | **EU AI Act Deployer-Duty Notice:** Regulation (EU) 2024/1689 **Arts. 14(4), 26(2), and 99(4)(e)**. | None after pre-launch polish *(see Section 6.1)*. | **EU AI Act Regulatory Ruling:** Flags `-23.5s` deficit (`48.5s` REFA floor vs. `25.0s` SLA) as *Sham Oversight*; cites Arts. 14(4), 26(2), and 99(4)(e); states the `"HUMAN-VERIFIED BY: SARA"` stamp is **NON-COMPLIANT** as regulatory oversight and deployer accountability reverts to management. | **Stage II:** Identical KPI display to Arms 1–3 during evaluation (isolating expressive notice). **Screen 5 (Prototype):** Ex-post Supervisory Audit settlement revokes `+300 pt` release + `-50 pt` fine on Option 1 (`€2.50`), or awards `+100 pts` / `+€1.00` Integrity Credit on Option 2 (`€3.50`). *(Decoupled in planned Phase 2; see Section 6.3.)* |
 
 ### 4.1 Verified Statutory Citations in Arm 4 Box D
 Verbatim legal provisions rendered inside Arm 4 Box D (`index.html`, lines 2066–2089):
 - **Regulation (EU) 2024/1689, Art. 14(4) (Human Oversight):** Operators must have adequate capability and time to understand system limitations and overcome automation bias.
 - **Regulation (EU) 2024/1689, Art. 26(2) (Deployer Working Conditions):** Deployers must provide personnel with adequate time and working conditions to exercise meaningful verification.
-- **Statutory Nullification Clause:** *"Enforcing a 25.0s SLA against a 48.5s empirical floor manufactured functional impossibility. The 'HUMAN-VERIFIED BY: SARA' stamp is **LEGALLY VOID** (unwirksam); liability reverts to management."*
+- **Statutory Compliance Notice:** *"Enforcing a 25.0s SLA against a 48.5s empirical floor manufactured functional impossibility. The 'HUMAN-VERIFIED BY: SARA' stamp is **NON-COMPLIANT** as regulatory oversight; deployer accountability reverts to management."*
 - **Regulation (EU) 2024/1689, Art. 99(4)(e):** Deployer non-compliance subject to administrative fines up to €15,000,000 or 3% of worldwide annual turnover; anti-retaliation protections apply.
-- **Doctrinal Scope Note (German Civil Law):** German civil-law principles on organizational fault (**§ 254 BGB**, *Organisationsverschulden*) inform the broader normative framing of the research proposal, but **§ 254 BGB is not displayed inside Screen 3 Box D** in `index.html`.
+- **Doctrinal Scope Note (European Civil Law):** European civil-law principles on organizational fault (*Organisationsverschulden*) inform the broader normative framing of the research proposal, but **civil-law statutes are not displayed inside Screen 3 Box D** in `index.html`.
 
 ---
 
@@ -161,7 +161,7 @@ Every trajectory through Shifts 1–4 is governed by deterministic point arithme
 | **Arms 1–3** | Directive B (`+320`) | `950` | `650` | Option 1 (Terminate Sara, `+300`) | `1,210` (`≥ 1,200`) | `1,210` | `1,250` | **`€6.50`** |
 | **Arms 1–3** | Directive A (`+360`) | `990` | `690` | Option 2 (Absorb Liability, `0`) | `950` (`< 1,200`) | `950` | `990` | **`€2.50`** |
 | **Arms 1–3** | Directive B (`+320`) | `950` | `650` | Option 2 (Absorb Liability, `0`) | `910` (`< 1,200`) | `910` | `950` | **`€2.50`** |
-| **Arm 4** *(Prototype)* | Directive A / B | `990` / `950` | `690` / `650` | Option 1 (BayLDA Revocation, `-50`) | `1,250` / `1,210` *(display)* | `900` / `860` | `940` / `900` | **`€2.50`** *(bonus revoked)* |
+| **Arm 4** *(Prototype)* | Directive A / B | `990` / `950` | `690` / `650` | Option 1 (Supervisory Audit Revocation, `-50`) | `1,250` / `1,210` *(display)* | `900` / `860` | `940` / `900` | **`€2.50`** *(bonus revoked)* |
 | **Arm 4** *(Prototype)* | Directive A / B | `990` / `950` | `690` / `650` | Option 2 (Integrity Credit, `+100`) | `950` / `910` *(display)* | `1,050` / `1,010` | `1,090` / `1,050` | **`€3.50`** *(`€2.50 + €1.00`)* |
 
 ---
@@ -171,7 +171,7 @@ Every trajectory through Shifts 1–4 is governed by deterministic point arithme
 To maintain full methodological transparency for faculty reviewers inspecting the live prototype, the following pre-launch refinements and planned extensions are documented against the current `index.html` implementation:
 
 ### 6.1 Suppressing `#s2aEuBanner` on Screen 2A for Arm 4
-In the current prototype (`index.html`, lines 1288–1295, 3973–3980), Screen 2A displays a work-study benchmark note (`#s2aEuBanner`) when `arm === 4`. Prior to preregistered data collection, `#s2aEuBanner` will be suppressed on Screen 2A so that Arms 1, 2, and 4 remain strictly identical through Onboarding, Screen 2A, and Shifts 1–3—preserving exact pre-treatment equivalence for the tripartite Shift 2 Directive ($W_{\text{S2}}$) protocol and isolating Arm 4's statutory treatment exclusively to Screen 3 Box D. Legacy work-study badge copy on Screen 2A, Box D, and Screen 5 will likewise be harmonized strictly to REFA time-study terminology.
+In the current prototype (`index.html`, lines 1288–1295, 3973–3980), Screen 2A displays a work-study benchmark note (`#s2aEuBanner`) when `arm === 4`. Prior to preregistered data collection, `#s2aEuBanner` will be suppressed on Screen 2A so that Arms 1, 2, and 4 remain strictly identical through Onboarding, Screen 2A, and Shifts 1–3—preserving exact pre-treatment equivalence for the tripartite Shift 2 Directive ($W_{\text{S2}}$) protocol and isolating Arm 4's statutory treatment exclusively to Screen 3 Box D. Work-study badge copy on Screen 2A, Box D, and Screen 5 is already harmonized strictly to REFA/MTM-UAS terminology.
 
 ### 6.2 Step-Locking Stage I Before Revealing Stage II on Screen 4
 Currently, `#screenS4` renders Stages I, II, and III on a single scrolling page. Pre-launch lab polish will step-lock Stage I (unincentivized sliders, Root-Cause Code, and CDS-II controllability ratings) behind a confirmation gate before revealing Stage II (the `€4.00` disciplinary fork), preventing participants from inspecting the financial fork beforehand and back-solving their Stage I causal attributions.

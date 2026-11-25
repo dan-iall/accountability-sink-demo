@@ -69,7 +69,7 @@ function createAdminEnvironment(initialStorage = {}) {
     clear: function() { Object.keys(localStorageStore).forEach(k => delete localStorageStore[k]); }
   };
 
-  const sessionStorageStore = { tum_auth_validated: '1' };
+  const sessionStorageStore = { study_auth_validated: '1' };
   const mockSessionStorage = {
     getItem: function(key) { return sessionStorageStore[key] || null; },
     setItem: function(key, val) { sessionStorageStore[key] = String(val); },
@@ -91,7 +91,7 @@ function createAdminEnvironment(initialStorage = {}) {
   };
 
   const mockWindow = {
-    location: { origin: 'http://localhost:8000', pathname: '/admin.html', search: '?access=tum2026' },
+    location: { origin: 'http://localhost:8000', pathname: '/admin.html', search: '?access=demo2026' },
     localStorage: mockLocalStorage,
     sessionStorage: mockSessionStorage,
     document: mockDocument,

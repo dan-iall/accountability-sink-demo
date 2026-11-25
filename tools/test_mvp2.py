@@ -4,7 +4,7 @@ MVP2 MASTER COMPREHENSIVE CERTIFICATION TEST SUITE
 Independent Research Prototype — Danial Bahrambeygi
 Validates:
   1. CSS tokens and keyframes in css/enterprise_slate.css
-  2. JSON configuration schema in tum_experiment_config.json
+  2. JSON configuration schema in experiment_config.json
   3. All 47 required DOM element IDs in admin.html
   4. All 165 required DOM element IDs in index.html
   5. All 33 data-aoi eye-tracking attributes in index.html
@@ -24,7 +24,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 def test_config():
     print("--------------------------------------------------")
     print("TEST 1: JSON Experiment Configuration Engine")
-    config_path = os.path.join(BASE_DIR, "tum_experiment_config.json")
+    config_path = os.path.join(BASE_DIR, "experiment_config.json")
     assert os.path.exists(config_path), f"Missing {config_path}"
     with open(config_path, "r", encoding="utf-8") as f:
         cfg = json.load(f)
@@ -58,7 +58,7 @@ def test_css():
     required_tokens = [
         "--bg-cockpit", "--bg-card", "--border-card", "--border-card-hover",
         "--text-primary", "--text-secondary", "--text-muted",
-        "--accent-primary", "--accent-tum", "--header-bg", "--hud-bg",
+        "--accent-primary", "--accent-academic", "--header-bg", "--hud-bg",
         "--status-ai", "--status-ai-bg", "--status-warning", "--status-warning-bg",
         "--status-crash", "--status-crash-bg", "--radius-card", "--gutter-aoi",
         "pulse-amber-glow", ".amber-glow-card", "flash-crimson", ".crimson-crash-alert",
@@ -192,7 +192,7 @@ def test_index_html():
     found_aois = set([el["data-aoi"] for el in aoi_elements])
     missing_aois = [a for a in required_aois if a not in found_aois]
     assert not missing_aois, f"Missing AOIs: {missing_aois}"
-    print(f"  ✓ All {len(required_aois)} Tobii Pro AOI tags present.")
+    print(f"  ✓ All {len(required_aois)} Viewport AOI tags present.")
 
 def test_truth_table_math():
     print("--------------------------------------------------")

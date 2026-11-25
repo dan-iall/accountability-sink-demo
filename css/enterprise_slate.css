@@ -1,7 +1,7 @@
 /**
  * ENTERPRISE LIGHT SLATE DESIGN SYSTEM (MVP2)
  * Independent Research Prototype — Danial Bahrambeygi
- * Positive Polarity, Zero Luminance Shock, Tobii Pro Eye-Tracking AOI Hygiene
+ * Positive Polarity, Zero Luminance Shock, Viewport AOI Spatial Hygiene
  * Conforms 100% to WHAT_WE_ARE_BUILDING.md (Section 8)
  */
 
@@ -19,7 +19,7 @@
 
   /* Brand Accents */
   --accent-primary: #2563EB;    /* Enterprise Blue 600 */
-  --accent-tum: #3070B3;        /* Official TUM Academic Blue (#0066CC / #3070B3) */
+  --accent-academic: #3070B3;   /* Academic Slate Blue */
   --header-bg: #0B1120;         /* Deep Navy Slate for Experimenter Header */
   --hud-bg: #0F172A;            /* Charcoal Slate for Operational Floor HUD */
 
@@ -33,7 +33,7 @@
 
   /* Spatial & Typography Tokens */
   --radius-card: 8px;           /* Standard rounded-lg border radius */
-  --gutter-aoi: 24px;           /* Strict 24px macro-gutter for Tobii Pro AOIs */
+  --gutter-aoi: 24px;           /* Strict 24px macro-gutter for Viewport AOIs */
 }
 
 /* ==========================================================================
@@ -79,7 +79,7 @@ html, body {
 }
 
 /* ==========================================================================
-   Tobii Pro AOI Spatial Hygiene (The 24px Macro-Gutter Rule)
+   Viewport AOI Spatial Hygiene (The 24px Macro-Gutter Rule)
    ========================================================================== */
 .aoi-gutter-grid {
   display: grid;
@@ -204,7 +204,7 @@ input[type="range"].slider-sla::-moz-range-thumb {
 }
 
 /* ==========================================================================
-   Tobii Pro Lab Gaze Simulator Overlay Wireframes
+   AOI Debug Overlay Wireframes
    ========================================================================== */
 .gaze-sim-overlay {
   position: fixed;

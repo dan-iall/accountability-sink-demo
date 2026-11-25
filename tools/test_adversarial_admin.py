@@ -17,7 +17,7 @@ import unittest
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADMIN_PATH = os.path.join(BASE_DIR, "admin.html")
-CONFIG_PATH = os.path.join(BASE_DIR, "tum_experiment_config.json")
+CONFIG_PATH = os.path.join(BASE_DIR, "experiment_config.json")
 HARNESS_JS = os.path.join(BASE_DIR, "tools", "admin_vm_harness.js")
 
 
@@ -57,7 +57,7 @@ class TestExtremeDynamicConfigBinding(unittest.TestCase):
             shiftDurationSimSec: 0
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(extremeConfig)
+            study_config: JSON.stringify(extremeConfig)
         });
 
         env.sandbox.window.updateConfigBadgeUI();
@@ -95,7 +95,7 @@ class TestExtremeDynamicConfigBinding(unittest.TestCase):
             shiftDurationSimSec: 86400.0
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(slaConfig)
+            study_config: JSON.stringify(slaConfig)
         });
         env.sandbox.window.updateConfigBadgeUI();
         const result = {
@@ -119,7 +119,7 @@ class TestExtremeDynamicConfigBinding(unittest.TestCase):
             performanceBonusEur: 100000.00
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(hugeConfig)
+            study_config: JSON.stringify(hugeConfig)
         });
         env.sandbox.window.updateConfigBadgeUI();
         const result = {
@@ -145,7 +145,7 @@ class TestExtremeDynamicConfigBinding(unittest.TestCase):
             bonusTargetPts: null
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(malformedConfig)
+            study_config: JSON.stringify(malformedConfig)
         });
         env.sandbox.window.updateConfigBadgeUI();
         const result = {
@@ -180,12 +180,12 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
             { pid: 'P_LEGACY_5', arm: 4, status: 'COMPLETED' }
         ];
         const env = createAdminEnvironment({
-            tum_study_sessions: JSON.stringify(preExisting)
+            study_sessions: JSON.stringify(preExisting)
         });
 
         // Execute replace mode with N=8
         const finalSessions = env.sandbox.window.generateSyntheticSessions(8, 'replace', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
 
         const result = {
             finalLength: finalSessions.length,
@@ -212,7 +212,7 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
         const { createAdminEnvironment } = require('./local_only/phd/paper1/mvp2/tools/admin_vm_harness.js');
         const env = createAdminEnvironment();
         const finalSessions = env.sandbox.window.generateSyntheticSessions(4, 'append', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
         const result = {
             finalLength: finalSessions.length,
             storedLength: stored.length,
@@ -243,12 +243,12 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
             { pid: 'P_4002', arm: 4, status: 'COMPLETED' }
         ];
         const env = createAdminEnvironment({
-            tum_study_sessions: JSON.stringify(preExisting)
+            study_sessions: JSON.stringify(preExisting)
         });
 
         // Append 4 sessions (1 per arm)
         const finalSessions = env.sandbox.window.generateSyntheticSessions(4, 'append', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
 
         const result = {
             totalCount: stored.length,
@@ -282,12 +282,12 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
             { pid: 'P_1005', arm: 1, status: 'COMPLETED' }
         ];
         const env = createAdminEnvironment({
-            tum_study_sessions: JSON.stringify(preExisting)
+            study_sessions: JSON.stringify(preExisting)
         });
 
         // Append 6 sessions. Since Arm 1 is overloaded (5), new sessions should fill Arms 2, 3, 4
         const finalSessions = env.sandbox.window.generateSyntheticSessions(6, 'append', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
 
         const newSessions = stored.slice(5);
         const newArms = newSessions.map(s => s.arm);
@@ -325,7 +325,7 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
         for (let i = 0; i < chunks.length; i++) {
             env.sandbox.window.generateSyntheticSessions(chunks[i], 'append', 100 + i);
         }
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
         const result = {
             totalCount: stored.length,
             uniquePids: new Set(stored.map(s => s.pid)).size,
@@ -356,10 +356,10 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
         const { createAdminEnvironment } = require('./local_only/phd/paper1/mvp2/tools/admin_vm_harness.js');
         const initial = JSON.stringify([{ pid: 'P_1001', arm: 1, status: 'COMPLETED' }]);
 
-        const env1 = createAdminEnvironment({ tum_study_sessions: initial });
+        const env1 = createAdminEnvironment({ study_sessions: initial });
         const run1 = env1.sandbox.window.generateSyntheticSessions(12, 'append', 777);
 
-        const env2 = createAdminEnvironment({ tum_study_sessions: initial });
+        const env2 = createAdminEnvironment({ study_sessions: initial });
         const run2 = env2.sandbox.window.generateSyntheticSessions(12, 'append', 777);
 
         const str1 = JSON.stringify(run1);
@@ -386,7 +386,7 @@ class TestSyntheticCohortGeneratorModes(unittest.TestCase):
             shiftDurationSimSec: 15.0
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(extremeConfig)
+            study_config: JSON.stringify(extremeConfig)
         });
 
         const sessions = env.sandbox.window.generateSyntheticSessions(4, 'replace', 42);
@@ -431,12 +431,12 @@ class TestBase64TokenQuarantineAdversarial(unittest.TestCase):
             shiftDurationSimSec: 10.0
         };
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify(customCfg)
+            study_config: JSON.stringify(customCfg)
         });
 
         // Trigger link generation
         env.sandbox.document.getElementById('inputPid').value = 'P_STRESS_999';
-        env.sandbox.document.getElementById('inputMetadata').value = 'TUM & CIT <Special> "Test"';
+        env.sandbox.document.getElementById('inputMetadata').value = 'Lab & Tech <Special> "Test"';
 
         // Invoke click on btnGenerateLink
         // In admin.html, btnGenerateLink packs payload and encodes to token
@@ -448,8 +448,8 @@ class TestBase64TokenQuarantineAdversarial(unittest.TestCase):
             pid: 'P_STRESS_999',
             arm: 2,
             speed: 3,
-            meta: 'TUM & CIT <Special> "Test"',
-            config: JSON.parse(env.localStorageStore['tum_study_config'])
+            meta: 'Lab & Tech <Special> "Test"',
+            config: JSON.parse(env.localStorageStore['study_config'])
         };
         const token = env.sandbox.btoa(env.sandbox.unescape(env.sandbox.encodeURIComponent(JSON.stringify(payload))));
         const decoded = JSON.parse(env.sandbox.decodeURIComponent(env.sandbox.escape(env.sandbox.atob(token))));
@@ -466,7 +466,7 @@ class TestBase64TokenQuarantineAdversarial(unittest.TestCase):
         res = run_in_node(js_code)
         self.assertGreater(res["tokenLength"], 50)
         self.assertEqual(res["decodedPid"], "P_STRESS_999")
-        self.assertEqual(res["decodedMeta"], 'TUM & CIT <Special> "Test"')
+        self.assertEqual(res["decodedMeta"], 'Lab & Tech <Special> "Test"')
         self.assertEqual(res["decodedHurdle"], 0)
         self.assertEqual(res["decodedBasePay"], 0)
         self.assertEqual(res["decodedTier1"], 0.5)
@@ -481,7 +481,7 @@ class TestAdversarialBoundaryEdgeCases(unittest.TestCase):
         js_code = """
         const { createAdminEnvironment } = require('./local_only/phd/paper1/mvp2/tools/admin_vm_harness.js');
         const env = createAdminEnvironment({
-            tum_study_config: JSON.stringify({ targetCohortN: 241 })
+            study_config: JSON.stringify({ targetCohortN: 241 })
         });
         env.sandbox.window.updateConfigBadgeUI();
         const result = {
@@ -504,8 +504,8 @@ class TestAdversarialBoundaryEdgeCases(unittest.TestCase):
         js_code = """
         const { createAdminEnvironment } = require('./local_only/phd/paper1/mvp2/tools/admin_vm_harness.js');
         const env = createAdminEnvironment({
-            tum_study_sessions: "{ CORRUPT_JSON: true ",
-            tum_study_config: "{ INVALID_CFG "
+            study_sessions: "{ CORRUPT_JSON: true ",
+            study_config: "{ INVALID_CFG "
         });
         // Should safely fallback to [] and DEFAULT_EXPERIMENT_CONFIG
         env.sandbox.window.updateBalancerUI();
@@ -555,10 +555,10 @@ class TestAdversarialBoundaryEdgeCases(unittest.TestCase):
             { pid: 'P_VALID_1', arm: 1, status: 'COMPLETED' }
         ];
         const env = createAdminEnvironment({
-            tum_study_sessions: JSON.stringify(oddSessions)
+            study_sessions: JSON.stringify(oddSessions)
         });
         const finalSessions = env.sandbox.window.generateSyntheticSessions(4, 'append', 42);
-        const stored = JSON.parse(env.localStorageStore['tum_study_sessions']);
+        const stored = JSON.parse(env.localStorageStore['study_sessions']);
         const result = {
             totalStored: stored.length,
             newCount: finalSessions.length - oddSessions.length,

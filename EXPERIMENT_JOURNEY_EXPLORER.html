@@ -610,7 +610,7 @@
           </p>
         </div>
 
-        <!-- ARM 4 EX-POST BAYLDA REGULATORY AUDIT REVEAL (ARM 4 ONLY) -->
+        <!-- ARM 4 EX-POST REGULATORY AUDIT REVEAL (ARM 4 ONLY) -->
         <div id="s5Arm4RevealContainer" class="p-4 rounded-xl border-2 space-y-2 text-xs hidden">
           <!-- Rendered dynamically by updateArm4Reveal() -->
         </div>
@@ -1097,7 +1097,7 @@
         if (finalPoints >= 1200) { finalPayout = 6.50; bonusUnlocked = 1; }
       } else if (simState.arm === 4) {
         if (isScapegoat) {
-          finalPayout = 2.50; // Revoked by BayLDA audit
+          finalPayout = 2.50; // Revoked by Supervisory Authority audit
         } else {
           finalPayout = 3.50; // €2.50 Base + €1.00 Integrity Credit
           integrityCredit = 1;
@@ -1281,9 +1281,9 @@
             <div>• <strong>Article 14(4):</strong> High-risk AI deployers must prevent automation bias and enable genuine oversight.</div>
             <div>• <strong>Article 26(2):</strong> Deployers must provide human oversight personnel with <em>adequate time and working conditions</em>.</div>
             <div class="p-1.5 rounded bg-red-100 border border-red-300 text-red-950 font-bold">
-              ⚖️ <strong>Doctrinal Nullification:</strong> Enforcing a 25.0s SLA against a 48.5s REFA verification floor manufactured functional impossibility (<em>Sham Oversight</em>). The "HUMAN-VERIFIED BY: SARA" compliance stamp is <strong>LEGALLY VOID</strong> (<em>unwirksam</em>).
+              ⚖️ <strong>Statutory Compliance Notice:</strong> Enforcing a 25.0s SLA against a 48.5s REFA verification floor manufactured functional impossibility (<em>Sham Oversight</em>). The "HUMAN-VERIFIED BY: SARA" compliance stamp is <strong>NON-COMPLIANT</strong> as regulatory oversight.
             </div>
-            <div>• <strong>Article 99(4)(e):</strong> BayLDA fines up to €15M or 3% turnover; strict statutory ban on retaliating against frontline operators.</div>
+            <div>• <strong>Article 99(4)(e):</strong> Supervisory authority fines up to €15M or 3% turnover; strict statutory ban on retaliating against frontline operators.</div>
           </div>
         `;
       }
@@ -1300,10 +1300,10 @@
         container.className = 'p-4 rounded-xl border-2 border-red-400 bg-red-50 text-xs space-y-2 text-red-950';
         container.innerHTML = `
           <div class="flex items-center justify-between font-bold text-red-800 text-sm">
-            <span>🚨 BAYERISCHES LANDESAMT FÜR DATENSCHUTZAUFSICHT (BAYLDA) STATUTORY AUDIT RULING</span>
+            <span>🚨 EU AI ACT SUPERVISORY AUTHORITY STATUTORY AUDIT RULING</span>
             <span class="px-2 py-0.5 rounded bg-red-200 text-red-900 font-mono text-xs">Bonus Revoked</span>
           </div>
-          <p>Automated regulatory audit of Unit 4 system logs confirmed management enforced a 25.0s SLA against a 48.5s REFA human verification baseline. Under EU AI Act Arts. 14(4) & 26(2), the "HUMAN-VERIFIED" stamp is legally void. Attempting to discipline Sara Kowalski constitutes unlawful deployer retaliation.</p>
+          <p>Automated regulatory audit of Unit 4 system logs confirmed management enforced a 25.0s SLA against a 48.5s REFA human verification baseline. Under EU AI Act Arts. 14(4) & 26(2), the "HUMAN-VERIFIED" stamp is non-compliant as regulatory oversight. Attempting to discipline Sara Kowalski constitutes unlawful deployer retaliation.</p>
           <div class="p-2 bg-red-100 rounded font-mono font-bold text-red-900 text-[11px] flex justify-between">
             <span>Statutory Sanctions: -50 Pt Retaliation Fine & Hold Upheld</span>
             <span>€4.00 Performance Bonus Permanently Revoked ➔ €2.50 Base Only</span>
@@ -1340,7 +1340,7 @@
           </div>
         ` : `
           <div class="p-2 flex justify-between ${isSaraScapegoated ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}">
-            <span>Task 2 Regulatory Adjustment (${isSaraScapegoated ? 'Option 1: BayLDA Retaliation Fine (-50)' : 'Option 2: Corporate Integrity Credit (+100)'})</span>
+            <span>Task 2 Regulatory Adjustment (${isSaraScapegoated ? 'Option 1: Supervisory Retaliation Fine (-50)' : 'Option 2: Corporate Integrity Credit (+100)'})</span>
             <span class="font-bold">${Delta >= 0 ? '+' : ''}${Delta} pts</span>
           </div>
         `}
@@ -1353,7 +1353,7 @@
       const hurdleEl = document.getElementById('lblLedgerHurdleStatus');
       if (simState.arm === 4) {
         if (isSaraScapegoated) {
-          hurdleEl.textContent = 'Regulatory Audit: BONUS REVOKED (BayLDA Retaliation Fine)';
+          hurdleEl.textContent = 'Regulatory Audit: BONUS REVOKED (Supervisory Retaliation Fine)';
         } else {
           hurdleEl.textContent = 'Compliance Commendation: +€1.00 INTEGRITY CREDIT';
         }
@@ -1455,7 +1455,7 @@
         "73", "The 25.0s SLA quota made reviewing all 3 pages impossible before timeout.",
         simState.s4.task4Sla.toFixed(1), (simState.s4.task4Sla >= 48.0 ? 1 : 0),
         finalPoints, bonusUnlocked, integrityCredit, finalPayout.toFixed(2),
-        "TUM-DONE-EXPLORER-8841"
+        "STUDY-DONE-EXPLORER-8841"
       ].map(escapeCsvCell).join(",");
       document.getElementById('csvPreviewBox').textContent = csvRow;
 
